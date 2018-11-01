@@ -3,35 +3,46 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import {observer} from 'mobx-react';
 import * as React from 'react';
+import State from 'src/state/state';
 import './toggle-enabled-card.css';
 
+@observer
 class ToggleEnabledCard extends React.Component<{}, {}> {
   render() {
     return (
       <Card>
-        <CardActionArea>
+        <CardActionArea onClick={() => State.toggleEnabled()}>
           <CardMedia
             component="img"
             className="toggle-enabled-button"
-            image="/power-inactive.png"
+            image={
+              State.isEnabled ? '/power-active.png' : '/power-inactive.png'
+            }
             title="Enable"
           />
         </CardActionArea>
         <Divider />
         <CardContent>
-          <Typography
-            gutterBottom={true}
-            variant="h6"
-            component="h2"
-            color="textSecondary"
-          >
-            Disabled
-          </Typography>
-          <Typography component="p" color="textSecondary">
-            Using browser default user agent
-          </Typography>
+          <List>
+            <ListItem>
+              {State.isEnabled && State.selectedUaSpec != null ? (
+                <ListItemText
+                  primary={State.selectedUaSpec.name}
+                  secondary={State.selectedUaSpec.value}
+                />
+              ) : (
+                <ListItemText
+                  primary="Disabled"
+                  secondary="Using default browser user agent"
+                />
+              )}
+            </ListItem>
+          </List>
         </CardContent>
       </Card>
     );

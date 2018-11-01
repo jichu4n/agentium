@@ -7,10 +7,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Radio from '@material-ui/core/Radio';
 import Typography from '@material-ui/core/Typography';
-import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
-import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import RadioButtonChecked from '@material-ui/icons/RadioButtonChecked';
+import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
+import {observer} from 'mobx-react';
 import * as React from 'react';
+import State from 'src/state/state';
 
+@observer
 class UaListCard extends React.Component<{}, {}> {
   render() {
     return (
@@ -21,19 +24,22 @@ class UaListCard extends React.Component<{}, {}> {
           </Typography>
         </CardContent>
         <List>
-          {[1, 2, 3, 4, 5, 6, 7].map((x) => (
-            <ListItem key="1" button={true} dense={true}>
+          {State.uaSpecList.map((uaSpec, idx) => (
+            <ListItem
+              key={idx}
+              button={true}
+              dense={true}
+              onClick={() => State.setSelectedUaSpecIdx(idx)}
+              selected={idx == State.selectedUaSpecIdx}
+            >
               <Radio
-                value={x}
+                value={idx}
                 color="default"
-                name="foo"
-                icon={<RadioButtonUncheckedIcon />}
-                checkedIcon={<RadioButtonCheckedIcon />}
+                icon={<RadioButtonUnchecked />}
+                checkedIcon={<RadioButtonChecked />}
+                checked={idx == State.selectedUaSpecIdx}
               />
-              <ListItemText
-                primary={`Internet Explorer ${x}`}
-                secondary="Test"
-              />
+              <ListItemText primary={uaSpec.name} />
             </ListItem>
           ))}
         </List>
