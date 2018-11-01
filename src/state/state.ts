@@ -11,6 +11,7 @@ import {
 import {browser} from 'webextension-polyfill-ts';
 import DEFAULT_UA_SPEC_LIST from './default-ua-spec-list';
 import UaSpec from './ua-spec';
+import BrowserStorage from './browser-storage';
 
 const UA_SPEC_LIST = 'v1/uaSpecList';
 const SELECTED_UA_SPEC_IDX = 'v1/selectedUaSpecIdx';
@@ -43,8 +44,8 @@ class State {
     console.info('LOAD START');
     let result = Object.assign(
       {},
-      await browser.storage.sync.get([UA_SPEC_LIST, SELECTED_UA_SPEC_IDX]),
-      await browser.storage.local.get([IS_ENABLED])
+      await BrowserStorage.syncGet([UA_SPEC_LIST, SELECTED_UA_SPEC_IDX]),
+      await BrowserStorage.localGet([IS_ENABLED])
     );
     runInAction(() => {
       if (_.has(result, UA_SPEC_LIST)) {
@@ -112,14 +113,14 @@ class State {
     this.isStoring = true;
     console.info('STORE START');
     let uaSpecListString = JSON.stringify(toJS(this.uaSpecList));
-    await browser.storage.sync.set({
+    await BrowserStorage.syncSet({
       [UA_SPEC_LIST]:
         uaSpecListString == DEFAULT_UA_SPEC_LIST_STRING
           ? '[]'
           : uaSpecListString,
       [SELECTED_UA_SPEC_IDX]: this.selectedUaSpecIdx,
     });
-    await browser.storage.local.set({
+    await BrowserStorage.localSet({
       [IS_ENABLED]: this.isEnabled,
     });
     console.info('STORE END');

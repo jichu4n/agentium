@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^3.3.2",
     "@material-ui/icons": "^3.0.1",
+    "detect-browser": "^3.0.1",
     "lodash": "^4.17.11",
     "mobx": "^5.5.2",
     "mobx-react": "^5.3.6",
@@ -23,6 +24,7 @@
     "watch": "onchange -i '**/*' -e 'build/**/*' --await-write-finish -- npm run build"
   },
   "devDependencies": {
+    "@types/detect-browser": "^2.0.1",
     "@types/jest": "^23.3.8",
     "@types/lodash": "^4.14.117",
     "@types/node": "^10.12.1",
