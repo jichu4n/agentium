@@ -1,17 +1,17 @@
 import * as _ from 'lodash';
 import {
   action,
+  computed,
   IObservableArray,
   observable,
   reaction,
   runInAction,
   toJS,
-  computed,
 } from 'mobx';
 import {browser} from 'webextension-polyfill-ts';
+import BrowserStorage from './browser-storage';
 import DEFAULT_UA_SPEC_LIST from './default-ua-spec-list';
 import UaSpec from './ua-spec';
-import BrowserStorage from './browser-storage';
 
 const UA_SPEC_LIST = 'v1/uaSpecList';
 const SELECTED_UA_SPEC_IDX = 'v1/selectedUaSpecIdx';
@@ -24,11 +24,37 @@ const DEFAULT_UA_SPEC_LIST_STRING = JSON.stringify(DEFAULT_UA_SPEC_LIST);
 
 class State {
   @observable
-  uaSpecList: IObservableArray<UaSpec> = observable([]);
+  public uaSpecList: IObservableArray<UaSpec> = observable([]);
   @observable
-  selectedUaSpecIdx = 0;
+  public selectedUaSpecIdx = 0;
   @observable
-  isEnabled = false;
+  public isEnabled = false;
+
+  @action
+  public toggleEnabled() {
+    if (!this.isEnabled && this.selectedUaSpec == null) {
+      return;
+    }
+    this.isEnabled = !this.isEnabled;
+  }
+
+  @action
+  public setSelectedUaSpecIdx(idx: number) {
+    if (idx >= 0 && idx < this.uaSpecList.length) {
+      this.selectedUaSpecIdx = idx;
+    }
+  }
+
+  @computed
+  public get selectedUaSpec() {
+    if (
+      this.selectedUaSpecIdx < 0 ||
+      this.selectedUaSpecIdx >= this.uaSpecList.length
+    ) {
+      return null;
+    }
+    return this.uaSpecList[this.selectedUaSpecIdx];
+  }
 
   isLoading = false;
   isStoring = false;
@@ -74,17 +100,6 @@ class State {
     this.isLoading = false;
   }
 
-  @computed
-  get selectedUaSpec() {
-    if (
-      this.selectedUaSpecIdx < 0 ||
-      this.selectedUaSpecIdx >= this.uaSpecList.length
-    ) {
-      return null;
-    }
-    return this.uaSpecList[this.selectedUaSpecIdx];
-  }
-
   async initialLoad() {
     await this.load();
     browser.storage.onChanged.addListener(this.onStorageChanged.bind(this));
@@ -92,21 +107,6 @@ class State {
       () => [toJS(this.uaSpecList), this.selectedUaSpecIdx, this.isEnabled],
       () => this.onStateChanged()
     );
-  }
-
-  @action
-  toggleEnabled() {
-    if (!this.isEnabled && this.selectedUaSpec == null) {
-      return;
-    }
-    this.isEnabled = !this.isEnabled;
-  }
-
-  @action
-  setSelectedUaSpecIdx(idx: number) {
-    if (idx >= 0 && idx < this.uaSpecList.length) {
-      this.selectedUaSpecIdx = idx;
-    }
   }
 
   async store() {
