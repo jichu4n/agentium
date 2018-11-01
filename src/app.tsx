@@ -2,6 +2,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import * as React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import 'typeface-roboto';
+import './app.css';
 import OptionsView from './options/options-view';
 import PopupView from './popup/popup-view';
 
