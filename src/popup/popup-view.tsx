@@ -6,8 +6,9 @@ import UaListCard from './ua-list-card';
 
 class PopupView extends React.Component<{}, {}> {
   render() {
+    document.body.classList.add('popup-view');
     return (
-      <div className="popup-view">
+      <div className="popup-view-container">
         <Grid container={true} spacing={8} direction="column">
           <Grid item={true} xs={true}>
             <ToggleEnabledCard />
