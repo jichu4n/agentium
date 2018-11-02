@@ -56,6 +56,10 @@ class State {
     return this.uaSpecList[this.selectedUaSpecIdx];
   }
 
+  public isEnabledAndHasValidUaSpec() {
+    return this.isEnabled && this.selectedUaSpec != null;
+  }
+
   isLoading = false;
   isStoring = false;
 

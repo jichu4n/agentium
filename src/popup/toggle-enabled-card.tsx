@@ -22,9 +22,11 @@ class ToggleEnabledCard extends React.Component<{}, {}> {
             component="img"
             className="toggle-enabled-button"
             image={
-              State.isEnabled ? '/power-active.png' : '/power-inactive.png'
+              State.isEnabledAndHasValidUaSpec()
+                ? '/power-active.png'
+                : '/power-inactive.png'
             }
-            title={State.isEnabled ? 'Turn off' : 'Turn on'}
+            title={State.isEnabledAndHasValidUaSpec() ? 'Turn off' : 'Turn on'}
           />
           <Divider />
           <List>
@@ -33,13 +35,19 @@ class ToggleEnabledCard extends React.Component<{}, {}> {
                 <ListItemText
                   primary={State.selectedUaSpec.name}
                   primaryTypographyProps={
-                    State.isEnabled ? {} : {color: 'textSecondary'}
+                    State.isEnabledAndHasValidUaSpec()
+                      ? {}
+                      : {color: 'textSecondary'}
                   }
                 />
                 <ListItemIcon>
                   <DeviceTypeIcon
                     deviceType={State.selectedUaSpec.deviceType}
-                    color={State.isEnabled ? undefined : 'disabled'}
+                    color={
+                      State.isEnabledAndHasValidUaSpec()
+                        ? undefined
+                        : 'disabled'
+                    }
                   />
                 </ListItemIcon>
               </ListItem>
