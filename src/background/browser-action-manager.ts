@@ -15,8 +15,8 @@ class BrowserActionManager {
     });
     browser.browserAction.setTitle({
       title: State.isEnabledAndHasValidUaSpec()
-        ? `Agentium: ON - ${State.selectedUaSpec!.name}`
-        : `Agentium: OFF - Using default browser user agent`,
+        ? `Agentium:  ON - ${State.selectedUaSpec!.name}`
+        : `Agentium:  OFF - Using default user agent`,
     });
   }
 }
