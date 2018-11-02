@@ -1,5 +1,7 @@
+import DeviceType from './device-type';
+
 interface UaSpec {
-  deviceType: 'desktop' | 'tablet' | 'mobile';
+  deviceType: DeviceType;
   name: string;
   value: string;
 }

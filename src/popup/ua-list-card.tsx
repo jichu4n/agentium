@@ -4,6 +4,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Radio from '@material-ui/core/Radio';
 import Typography from '@material-ui/core/Typography';
@@ -11,6 +12,7 @@ import RadioButtonChecked from '@material-ui/icons/RadioButtonChecked';
 import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
 import {observer} from 'mobx-react';
 import * as React from 'react';
+import DeviceTypeIcon from 'src/lib/device-type-icon';
 import State from 'src/state/state';
 
 @observer
@@ -40,6 +42,9 @@ class UaListCard extends React.Component<{}, {}> {
                 checked={idx == State.selectedUaSpecIdx}
               />
               <ListItemText primary={uaSpec.name} />
+              <ListItemIcon>
+                <DeviceTypeIcon deviceType={uaSpec.deviceType} />
+              </ListItemIcon>
             </ListItem>
           ))}
         </List>

@@ -1,13 +1,14 @@
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import {observer} from 'mobx-react';
 import * as React from 'react';
+import DeviceTypeIcon from 'src/lib/device-type-icon';
 import State from 'src/state/state';
 import './toggle-enabled-card.css';
 
@@ -23,27 +24,28 @@ class ToggleEnabledCard extends React.Component<{}, {}> {
             image={
               State.isEnabled ? '/power-active.png' : '/power-inactive.png'
             }
-            title="Enable"
+            title={State.isEnabled ? 'Turn off' : 'Turn on'}
           />
-        </CardActionArea>
-        <Divider />
-        <CardContent>
+          <Divider />
           <List>
-            <ListItem>
-              {State.isEnabled && State.selectedUaSpec != null ? (
+            {State.selectedUaSpec != null && (
+              <ListItem dense={true}>
                 <ListItemText
                   primary={State.selectedUaSpec.name}
-                  secondary={State.selectedUaSpec.value}
+                  primaryTypographyProps={
+                    State.isEnabled ? {} : {color: 'textSecondary'}
+                  }
                 />
-              ) : (
-                <ListItemText
-                  primary="Disabled"
-                  secondary="Using default browser user agent"
-                />
-              )}
-            </ListItem>
+                <ListItemIcon>
+                  <DeviceTypeIcon
+                    deviceType={State.selectedUaSpec.deviceType}
+                    color={State.isEnabled ? undefined : 'disabled'}
+                  />
+                </ListItemIcon>
+              </ListItem>
+            )}
           </List>
-        </CardContent>
+        </CardActionArea>
       </Card>
     );
   }

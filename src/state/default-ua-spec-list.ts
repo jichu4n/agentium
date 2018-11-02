@@ -1,4 +1,4 @@
-import UaSpec from './ua-spec';
+import UaSpec from 'src/lib/ua-spec';
 
 const DEFAULT_UA_SPEC_LIST: Array<UaSpec> = [
   {

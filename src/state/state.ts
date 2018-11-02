@@ -8,10 +8,10 @@ import {
   runInAction,
   toJS,
 } from 'mobx';
+import UaSpec from 'src/lib/ua-spec';
 import {browser} from 'webextension-polyfill-ts';
 import BrowserStorage from './browser-storage';
 import DEFAULT_UA_SPEC_LIST from './default-ua-spec-list';
-import UaSpec from './ua-spec';
 
 const UA_SPEC_LIST = 'v1/uaSpecList';
 const SELECTED_UA_SPEC_IDX = 'v1/selectedUaSpecIdx';
