@@ -5,6 +5,11 @@ import ToggleEnabledCard from './toggle-enabled-card';
 import UaListCard from './ua-list-card';
 
 class PopupView extends React.Component<{}, {}> {
+  constructor(props: any) {
+    super(props);
+    console.info('POPUP');
+  }
+
   render() {
     document.body.classList.add('popup-view');
     return (

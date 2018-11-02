@@ -16,6 +16,16 @@
     "default_title": "Agentium",
     "default_popup": "popup.html"
   },
+  "background": {
+    "page": "background.html",
+    "persistent": true
+  },
   "options_page": "options.html",
-  "permissions": ["storage"]
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "http://*",
+    "https://*"
+  ]
 }

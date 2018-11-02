@@ -4,6 +4,7 @@ import * as React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import 'typeface-roboto';
 import './app.css';
+import BackgroundView from './background/background-view';
 import OptionsView from './options/options-view';
 import PopupView from './popup/popup-view';
 
@@ -21,6 +22,7 @@ class App extends React.Component<{}, {}> {
         <div>
           <CssBaseline />
           <Route path="/popup.html" component={PopupView} />
+          <Route path="/background.html" component={BackgroundView} />
           <Route path="/options.html" component={OptionsView} />
         </div>
       </Router>
