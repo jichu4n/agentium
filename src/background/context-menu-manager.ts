@@ -1,11 +1,12 @@
-import * as _ from 'lodash';
 import {reaction, toJS} from 'mobx';
+import openOptionsPage from 'src/lib/open-options-page';
 import State from 'src/state/state';
 import {browser, Menus} from 'webextension-polyfill-ts';
 
 const TOGGLE_ENABLED = 'toggle-enabled';
 const UA_SPEC_LIST = 'ua-spec-list';
 const UA_SPEC_PREFIX = 'ua-spec-';
+const OPTIONS = 'options';
 
 class ContextMenuManager {
   public start() {
@@ -21,6 +22,9 @@ class ContextMenuManager {
     switch (menuItemId) {
       case TOGGLE_ENABLED:
         this.onToggleEnabled();
+        break;
+      case OPTIONS:
+        openOptionsPage();
         break;
       default:
         if (menuItemId.startsWith(UA_SPEC_PREFIX)) {
@@ -66,6 +70,17 @@ class ContextMenuManager {
         title: uaSpec.name,
         parentId: UA_SPEC_LIST,
       });
+    });
+    browser.contextMenus.create({
+      contexts: ['browser_action'],
+      type: 'separator',
+      parentId: UA_SPEC_LIST,
+    });
+    browser.contextMenus.create({
+      contexts: ['browser_action'],
+      id: OPTIONS,
+      title: 'Edit user agents...',
+      parentId: UA_SPEC_LIST,
     });
   }
 }

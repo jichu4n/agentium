@@ -1,0 +1,8 @@
+.card-title {
+  padding-bottom: 0 !important;
+}
+
+.card-title-span {
+  font-size: 0.85rem !important;
+  letter-spacing: 0.04rem;
+}

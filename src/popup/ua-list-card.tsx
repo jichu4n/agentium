@@ -1,18 +1,18 @@
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Radio from '@material-ui/core/Radio';
-import Typography from '@material-ui/core/Typography';
 import RadioButtonChecked from '@material-ui/icons/RadioButtonChecked';
 import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
 import {observer} from 'mobx-react';
 import * as React from 'react';
+import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
+import openOptionsPage from 'src/lib/open-options-page';
 import State from 'src/state/state';
 
 @observer
@@ -20,11 +20,7 @@ class UaListCard extends React.Component<{}, {}> {
   render() {
     return (
       <Card>
-        <CardContent className="card-header">
-          <Typography variant="button" color="textSecondary">
-            User agents
-          </Typography>
-        </CardContent>
+        <CardTitle text="User agents" />
         <List>
           {State.uaSpecList.map((uaSpec, idx) => (
             <ListItem
@@ -49,7 +45,9 @@ class UaListCard extends React.Component<{}, {}> {
           ))}
         </List>
         <CardActions>
-          <Button color="primary">Edit user agents</Button>
+          <Button color="primary" onClick={openOptionsPage}>
+            Edit user agents
+          </Button>
         </CardActions>
       </Card>
     );
