@@ -7,6 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {observer} from 'mobx-react';
 import * as React from 'react';
+import AboutCard from './about-card';
 import EditUaListCard from './edit-ua-list-card';
 import './options-view.css';
 
@@ -19,9 +20,16 @@ const APP_BAR_THEME = createMuiTheme({
   },
 });
 
+const CardWrapper: React.StatelessComponent<{}> = ({children}) => (
+  <Grid item={true} xs={12} md={10} lg={8}>
+    {children}
+  </Grid>
+);
+
 @observer
 class OptionsView extends React.Component<{}, {}> {
   render() {
+    document.body.classList.add('options-view');
     return (
       <div>
         <MuiThemeProvider theme={APP_BAR_THEME}>
@@ -41,9 +49,12 @@ class OptionsView extends React.Component<{}, {}> {
           alignItems="center"
           className="options-cards-container"
         >
-          <Grid item={true} xs={12} md={10} lg={8}>
+          <CardWrapper>
             <EditUaListCard />
-          </Grid>
+          </CardWrapper>
+          <CardWrapper>
+            <AboutCard />
+          </CardWrapper>
         </Grid>
       </div>
     );

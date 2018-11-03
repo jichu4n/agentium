@@ -2,8 +2,8 @@
   "manifest_version": 2,
   "name": "Agentium: User agent switcher",
   "author": "Chuan Ji",
-  "version": "0.1",
-  "description": "Switches the user agent string of your browser.",
+  "version": "0.1.0",
+  "description": "Lets you control the user agent string reported by your browser.",
   "icons": {
     "32": "icon-32.png",
     "128": "icon-128.png"
@@ -28,5 +28,6 @@
     "webRequestBlocking",
     "http://*/*",
     "https://*/*"
-  ]
+  ],
+  "homepage_url": "https://github.com/jichu4n/agentium"
 }
