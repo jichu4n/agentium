@@ -131,11 +131,11 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
                 <MenuItem key="desktop" value="desktop">
                   Desktop
                 </MenuItem>
-                <MenuItem key="tablet" value="tablet">
-                  Tablet
-                </MenuItem>
                 <MenuItem key="mobile" value="mobile">
                   Phone
+                </MenuItem>
+                <MenuItem key="tablet" value="tablet">
+                  Tablet
                 </MenuItem>
               </TextField>
             </DialogContent>
