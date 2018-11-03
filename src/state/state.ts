@@ -79,6 +79,11 @@ class State {
   }
 
   @action
+  public addUaSpec(uaSpec: UaSpec) {
+    this.uaSpecList.push(uaSpec);
+  }
+
+  @action
   public deleteUaSpec(idx: number) {
     if (idx < 0 || idx >= this.uaSpecList.length) {
       return;
@@ -93,10 +98,22 @@ class State {
   }
 
   @action
+  public updateUaSpec(idx: number, uaSpec: UaSpec) {
+    if (idx < 0 || idx >= this.uaSpecList.length) {
+      return;
+    }
+    this.uaSpecList.splice(idx, 1, uaSpec);
+  }
+
+  @action
   public resetUaSpecListToDefault() {
     this.uaSpecList.replace(DEFAULT_UA_SPEC_LIST);
     this.selectedUaSpecIdx = 0;
     this.isEnabled = false;
+  }
+
+  public isUaSpecListSameAsDefault() {
+    return _.isEqual(toJS(this.uaSpecList), DEFAULT_UA_SPEC_LIST);
   }
 
   isLoading = false;
