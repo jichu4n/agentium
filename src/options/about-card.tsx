@@ -36,7 +36,7 @@ class AboutCard extends React.Component<{}, {}> {
             </a>
             .
           </Typography>
-          <Typography gutterBottom={true}>&nbsp;</Typography>
+          <Typography>&nbsp;</Typography>
 
           <Typography gutterBottom={true} variant="subtitle2">
             Author
@@ -58,7 +58,7 @@ class AboutCard extends React.Component<{}, {}> {
               </li>
             </ul>
           </Typography>
-          <Typography gutterBottom={true}>&nbsp;</Typography>
+          <Typography>&nbsp;</Typography>
 
           <Typography>
             Copyright &copy; 2018 Chuan Ji. All rights reserved.
