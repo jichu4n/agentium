@@ -7,6 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {observer} from 'mobx-react';
 import * as React from 'react';
+import Helmet from 'react-helmet';
 import AboutCard from './about-card';
 import EditUaListCard from './edit-ua-list-card';
 import './options-view.css';
@@ -29,9 +30,12 @@ const CardWrapper: React.StatelessComponent<{}> = ({children}) => (
 @observer
 class OptionsView extends React.Component<{}, {}> {
   render() {
-    document.body.classList.add('options-view');
     return (
       <div>
+        <Helmet>
+          <title>Settings</title>
+          <body className="options-view" />
+        </Helmet>
         <MuiThemeProvider theme={APP_BAR_THEME}>
           <AppBar position="static">
             <Toolbar>

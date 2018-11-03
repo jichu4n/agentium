@@ -11,6 +11,7 @@
     "mobx-react": "^5.3.6",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
+    "react-helmet": "^5.2.0",
     "react-router-dom": "^4.3.1",
     "react-scripts-ts": "3.1.0",
     "typeface-roboto": "^0.0.54",
@@ -30,6 +31,7 @@
     "@types/node": "^10.12.1",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
+    "@types/react-helmet": "^5.0.7",
     "@types/react-router-dom": "^4.3.1",
     "onchange": "^5.0.2",
     "typescript": "^3.1.4"
