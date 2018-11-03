@@ -3,6 +3,10 @@ body.options-view {
 }
 
 .options-cards-container {
-  margin-top: 20px !important;
+  margin-top: 70px !important;
   padding: 10px;
+}
+
+.appbar-icon {
+  margin-right: 15px;
 }

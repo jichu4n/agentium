@@ -1,4 +1,5 @@
 import AppBar from '@material-ui/core/AppBar';
+import Avatar from '@material-ui/core/Avatar';
 import yellow from '@material-ui/core/colors/yellow';
 import Grid from '@material-ui/core/Grid';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
@@ -37,10 +38,11 @@ class OptionsView extends React.Component<{}, {}> {
           <body className="options-view" />
         </Helmet>
         <MuiThemeProvider theme={APP_BAR_THEME}>
-          <AppBar position="static">
+          <AppBar position="fixed">
             <Toolbar>
+              <Avatar src="/icon-128.png" className="appbar-icon" />
               <Typography variant="h6" color="inherit">
-                Agentium settings
+                Settings
               </Typography>
             </Toolbar>
           </AppBar>
