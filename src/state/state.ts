@@ -60,6 +60,45 @@ class State {
     return this.isEnabled && this.selectedUaSpec != null;
   }
 
+  @action
+  public moveUaSpecDown(idx: number) {
+    if (idx < 0 || idx >= this.uaSpecList.length - 1) {
+      return;
+    }
+    this.uaSpecList.splice(
+      idx,
+      2,
+      this.uaSpecList[idx + 1],
+      this.uaSpecList[idx]
+    );
+    if (this.selectedUaSpecIdx == idx) {
+      this.selectedUaSpecIdx = idx + 1;
+    } else if (this.selectedUaSpecIdx == idx + 1) {
+      this.selectedUaSpecIdx = idx;
+    }
+  }
+
+  @action
+  public deleteUaSpec(idx: number) {
+    if (idx < 0 || idx >= this.uaSpecList.length) {
+      return;
+    }
+    this.uaSpecList.splice(idx, 1);
+    if (this.selectedUaSpecIdx == idx || this.uaSpecList.length == 0) {
+      this.selectedUaSpecIdx = 0;
+      this.isEnabled = false;
+    } else if (this.selectedUaSpecIdx > idx) {
+      --this.selectedUaSpecIdx;
+    }
+  }
+
+  @action
+  public resetUaSpecListToDefault() {
+    this.uaSpecList.replace(DEFAULT_UA_SPEC_LIST);
+    this.selectedUaSpecIdx = 0;
+    this.isEnabled = false;
+  }
+
   isLoading = false;
   isStoring = false;
 

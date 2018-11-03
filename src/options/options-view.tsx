@@ -36,7 +36,7 @@ class OptionsView extends React.Component<{}, {}> {
         <Grid
           container={true}
           spacing={16}
-          direction="column"
+          direction="row"
           justify="center"
           alignItems="center"
           className="options-cards-container"

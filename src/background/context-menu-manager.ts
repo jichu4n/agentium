@@ -46,16 +46,15 @@ class ContextMenuManager {
 
   onStateChange() {
     browser.contextMenus.removeAll();
-    if (State.selectedUaSpec == null || State.uaSpecList.length == 0) {
-      return;
+    if (State.selectedUaSpec != null && State.uaSpecList.length > 0) {
+      browser.contextMenus.create({
+        contexts: ['browser_action'],
+        id: TOGGLE_ENABLED,
+        title: State.isEnabled
+          ? 'Turn OFF - Use default user agent'
+          : `Turn ON - ${State.selectedUaSpec.name}`,
+      });
     }
-    browser.contextMenus.create({
-      contexts: ['browser_action'],
-      id: TOGGLE_ENABLED,
-      title: State.isEnabled
-        ? 'Turn OFF - Use default user agent'
-        : `Turn ON - ${State.selectedUaSpec.name}`,
-    });
     browser.contextMenus.create({
       contexts: ['browser_action'],
       id: UA_SPEC_LIST,
