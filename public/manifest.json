@@ -3,7 +3,7 @@
   "name": "Agentium: User agent switcher",
   "author": "Chuan Ji",
   "version": "0.1.0",
-  "description": "Lets you control the user agent string reported by your browser.",
+  "description": "Lets you control the user agent identity reported by your browser.",
   "homepage_url": "https://github.com/jichu4n/agentium",
   "icons": {
     "32": "icon-32.png",

@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package 
+	xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+	xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+	xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+	IgnorableNamespaces="uap3">
+	<Identity 
+		Name="1913ChuanJi.AgentiumUseragentswitcher" 
+		Publisher="CN=63312FB2-E38F-49C0-9C01-E70CC40C6A5F" 
+		Version="0.0.1.0" /> <!-- UPDATE IDENTITY -->
+
+	<Properties> 
+		<DisplayName>Agentium: User agent switcher</DisplayName> 
+		<PublisherDisplayName>Chuan Ji</PublisherDisplayName> <!-- UPDATE PUBLISHER DISPLAY NAME -->
+		<Logo>Assets\StoreLogo.png</Logo> 
+	</Properties> 
+
+	<Dependencies> 
+		<TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.15063.0" MaxVersionTested="10.0.15063.0" />
+	</Dependencies> 
+
+	<Resources>
+		<Resource Language="en-us" />
+		<Resource uap:Scale="200"/>
+	</Resources> 
+
+	<Applications> 
+		<Application Id="App">
+			<uap:VisualElements
+				AppListEntry="none"
+				DisplayName="Agentium: User agent switcher"
+				Square150x150Logo="Assets\Square150x150Logo.png"
+        		Square44x44Logo="Assets\Square44x44Logo.png"
+				Description="Lets you control the user agent identity reported by your browser."
+				BackgroundColor="transparent">
+			</uap:VisualElements>
+			<Extensions>
+				<uap3:Extension Category="windows.appExtension">
+					<uap3:AppExtension
+						Name="com.microsoft.edge.extension"
+						Id="EdgeExtension"
+						PublicFolder="Extension"
+						DisplayName="Agentium: User agent switcher">
+						<uap3:Properties>
+							<Capabilities>
+								<Capability Name="browserStorage"/>
+								<Capability Name="browserWebRequest"/>
+								<Capability Name="websiteContent"/>
+							</Capabilities>
+						</uap3:Properties>
+					</uap3:AppExtension>
+				</uap3:Extension>
+			</Extensions>
+		</Application> 
+	</Applications>
+</Package>

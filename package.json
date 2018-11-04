@@ -22,7 +22,8 @@
     "build": "react-scripts-ts build && misc/post-build.sh",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
-    "watch": "onchange -i '**/*' -e 'build/**/*' --await-write-finish -- npm run build"
+    "watch": "misc/watch.sh",
+    "build-edge": "npm run build && packaging/edge/build-edge.sh"
   },
   "devDependencies": {
     "@types/detect-browser": "^2.0.1",
@@ -33,6 +34,7 @@
     "@types/react-dom": "^16.0.9",
     "@types/react-helmet": "^5.0.7",
     "@types/react-router-dom": "^4.3.1",
+    "manifoldjs": "^0.7.6",
     "onchange": "^5.0.2",
     "typescript": "^3.1.4"
   }
