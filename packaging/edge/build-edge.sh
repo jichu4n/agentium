@@ -4,11 +4,11 @@ export PATH="$(npm bin):$PATH"
 set -ex
 
 ROOT="$PWD"
-BUILD_DIR="$PWD/build"
-OUTPUT_DIR="$PWD/build-edge"
+BUILD_DIR="$ROOT/build"
+OUTPUT_DIR="$ROOT/build-edge"
 OUTPUT_EXTENSION_DIR="$OUTPUT_DIR/AgentiumUseragentswitcher/edgeextension"
 OUTPUT_MANIFEST_DIR="$OUTPUT_EXTENSION_DIR/manifest"
-SCRIPT_DIR="$PWD/packaging/edge"
+SCRIPT_DIR="$ROOT/packaging/edge"
 
 if [ ! -d "$BUILD_DIR"]; then
   echo 'Please build with "npm build" first'

@@ -9,6 +9,7 @@
 # production
 /build
 /build-edge
+/build-firefox
 
 # misc
 .DS_Store
