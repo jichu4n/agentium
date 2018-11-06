@@ -10,6 +10,7 @@
 /build
 /build-edge
 /build-firefox
+/build-chrome
 
 # misc
 .DS_Store

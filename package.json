@@ -24,7 +24,8 @@
     "eject": "react-scripts-ts eject",
     "watch": "misc/watch.sh",
     "build-edge": "npm run build && packaging/edge/build-edge.sh",
-    "build-firefox": "npm run build && packaging/firefox/build-firefox.sh"
+    "build-firefox": "npm run build && packaging/firefox/build-firefox.sh",
+    "build-chrome": "packaging/chrome/build-chrome.sh"
   },
   "devDependencies": {
     "@types/detect-browser": "^2.0.1",

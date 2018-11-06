@@ -1,6 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Agentium: User agent switcher",
+  "short_name": "Agentium",
   "author": "Chuan Ji",
   "version": "0.1.1",
   "description": "Control the user agent identity reported by your browser.",
