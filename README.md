@@ -12,9 +12,9 @@ Highlights:
 
 Agentium is available on:
 
+- Google Chrome: https://chrome.google.com/webstore/detail/agentium-user-agent-switc/kabejgcoafnliefbhejpfahdecimjcje
 - Mozilla Firefox: https://addons.mozilla.org/en-US/firefox/addon/agentium/
-- Google Chrome: Pending
-- Microsoft Edge: Pending
+- Microsoft Edge: _TBA_
 
 ### Screenshots
 
