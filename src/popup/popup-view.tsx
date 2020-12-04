@@ -1,6 +1,6 @@
 import Grid from '@material-ui/core/Grid';
 import * as React from 'react';
-import Helmet from 'react-helmet';
+import {Helmet} from 'react-helmet';
 import './popup-view.css';
 import ToggleEnabledCard from './toggle-enabled-card';
 import UaListCard from './ua-list-card';
