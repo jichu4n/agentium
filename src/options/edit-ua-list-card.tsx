@@ -10,12 +10,11 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import Delete from '@material-ui/icons/Delete';
-import Edit from '@material-ui/icons/Edit';
 import * as _ from 'lodash';
 import {observer} from 'mobx-react';
 import * as React from 'react';
@@ -23,7 +22,6 @@ import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import UaSpec from 'src/lib/ua-spec';
 import State from 'src/state/state';
-import MenuItem from '@material-ui/core/MenuItem';
 import './edit-ua-list-card.css';
 
 interface EditUaListCardState {
@@ -62,17 +60,20 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         <CardTitle text="User agents" />
         <List>
           {State.uaSpecList.map((uaSpec, idx) => (
-            <ListItem>
+            <ListItem button={true} onClick={() => this.onEdit(idx)}>
               <ListItemIcon>
                 <DeviceTypeIcon deviceType={uaSpec.deviceType} />
               </ListItemIcon>
-              <ListItemText primary={uaSpec.name} secondary={uaSpec.value} />
-              <IconButton onClick={() => this.onEdit(idx)}>
-                <Edit />
-              </IconButton>
-              <IconButton onClick={() => this.onDelete(idx)}>
-                <Delete />
-              </IconButton>
+              <ListItemText
+                primary={uaSpec.name}
+                secondary={uaSpec.value}
+                style={{width: 'max-content', maxWidth: 400}}
+                secondaryTypographyProps={{
+                  style: {
+                    wordBreak: 'break-all',
+                  },
+                }}
+              />
               <IconButton onClick={() => this.onMoveUp(idx)}>
                 <ArrowUpward />
               </IconButton>
@@ -141,6 +142,16 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
             </DialogContent>
           )}
           <DialogActions>
+            <Button
+              color="secondary"
+              onClick={() => this.onDelete()}
+              style={{
+                marginLeft: 8,
+                marginRight: 'auto',
+              }}
+            >
+              Delete
+            </Button>
             <Button color="primary" onClick={() => this.onCancelEdit()}>
               Cancel
             </Button>
@@ -255,16 +266,14 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     });
   }
 
-  onDelete(idx: number) {
+  onDelete() {
     this.setState({
-      activeUaSpecIdx: idx,
       isDeleteConfirmationDialogOpen: true,
     });
   }
 
   onCancelDelete() {
     this.setState({
-      activeUaSpecIdx: -1,
       isDeleteConfirmationDialogOpen: false,
     });
   }
@@ -273,6 +282,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     State.deleteUaSpec(this.state.activeUaSpecIdx);
     this.setState({
       activeUaSpecIdx: -1,
+      isEditDialogOpen: false,
       isDeleteConfirmationDialogOpen: false,
     });
   }
