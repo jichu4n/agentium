@@ -34,19 +34,19 @@ Agentium is available on:
 
 This extension was developed with Typescript / React / Material-UI.
 
-To build the extension, use `yarn`:
+To build the extension:
 
 ```bash
 git clone https://github.com/jichu4n/agentium.git
 cd agentium
-yarn install
+npm install
 
 # To produce unpacked extension for development in build/
-yarn run build
+npm run build
 # Mozilla Firefox - build-firefox/extension.xpi
-yarn run build-firefox
+npm run build-firefox
 # Google Chrome - build-chrome/extension.zip
-yarn run build-chrome
+npm run build-chrome
 # Microsoft Edge - build-edge/edgeExtension.appx
-yarn run build-edge
+npm run build-edge
 ```
