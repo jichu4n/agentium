@@ -11,7 +11,7 @@ import './about-card.css';
 
 class AboutCard extends React.Component<{}, {}> {
   render() {
-    let manifest = browser.runtime.getManifest();
+    const manifest = browser.runtime.getManifest();
     return (
       <Paper>
         <CardTitle text="About" />
@@ -25,11 +25,11 @@ class AboutCard extends React.Component<{}, {}> {
           <Typography gutterBottom={true} variant="subtitle2">
             Source code
           </Typography>
-          <Typography gutterBottom={true}>
+          <Typography gutterBottom={true} variant="body2">
             Agentium is open-source software distributed under the Apache 2.0
             License.
           </Typography>
-          <Typography gutterBottom={true}>
+          <Typography gutterBottom={true} variant="body2">
             Please feel free to fork &amp; contribute at{' '}
             <a href="https://github.com/jichu4n/agentium" target="_blank">
               github.com/jichu4n/agentium
@@ -41,7 +41,7 @@ class AboutCard extends React.Component<{}, {}> {
           <Typography gutterBottom={true} variant="subtitle2">
             Author
           </Typography>
-          <Typography gutterBottom={true}>
+          <Typography gutterBottom={true} variant="body2">
             Agentium is developed by Chuan Ji. Find me on:
             <ul>
               <li>
@@ -60,8 +60,8 @@ class AboutCard extends React.Component<{}, {}> {
           </Typography>
           <Typography>&nbsp;</Typography>
 
-          <Typography>
-            Copyright &copy; 2018 Chuan Ji. All rights reserved.
+          <Typography variant="body2">
+            Copyright &copy; 2018-2020 Chuan Ji.
           </Typography>
         </CardContent>
       </Paper>

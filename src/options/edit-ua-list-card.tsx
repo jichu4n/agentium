@@ -10,12 +10,11 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import Delete from '@material-ui/icons/Delete';
-import Edit from '@material-ui/icons/Edit';
 import * as _ from 'lodash';
 import {observer} from 'mobx-react';
 import * as React from 'react';
@@ -23,7 +22,6 @@ import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import UaSpec from 'src/lib/ua-spec';
 import State from 'src/state/state';
-import MenuItem from '@material-ui/core/MenuItem';
 import './edit-ua-list-card.css';
 
 interface EditUaListCardState {
@@ -62,21 +60,34 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         <CardTitle text="User agents" />
         <List>
           {State.uaSpecList.map((uaSpec, idx) => (
-            <ListItem>
+            <ListItem button={true} onClick={() => this.onEdit(idx)}>
               <ListItemIcon>
                 <DeviceTypeIcon deviceType={uaSpec.deviceType} />
               </ListItemIcon>
-              <ListItemText primary={uaSpec.name} secondary={uaSpec.value} />
-              <IconButton onClick={() => this.onEdit(idx)}>
-                <Edit />
-              </IconButton>
-              <IconButton onClick={() => this.onDelete(idx)}>
-                <Delete />
-              </IconButton>
-              <IconButton onClick={() => this.onMoveUp(idx)}>
+              <ListItemText
+                primary={uaSpec.name}
+                secondary={uaSpec.value}
+                style={{width: 'max-content', maxWidth: 400}}
+                secondaryTypographyProps={{
+                  style: {
+                    wordBreak: 'break-all',
+                  },
+                }}
+              />
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.onMoveUp(idx);
+                }}
+              >
                 <ArrowUpward />
               </IconButton>
-              <IconButton onClick={() => this.onMoveDown(idx)}>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.onMoveDown(idx);
+                }}
+              >
                 <ArrowDownward />
               </IconButton>
             </ListItem>
@@ -90,6 +101,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
             color="primary"
             onClick={() => this.onReset()}
             disabled={State.isUaSpecListSameAsDefault()}
+            style={{marginLeft: 'auto'}}
           >
             Reset to default
           </Button>
@@ -141,6 +153,16 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
             </DialogContent>
           )}
           <DialogActions>
+            <Button
+              color="secondary"
+              onClick={() => this.onDelete()}
+              style={{
+                marginLeft: 8,
+                marginRight: 'auto',
+              }}
+            >
+              Delete
+            </Button>
             <Button color="primary" onClick={() => this.onCancelEdit()}>
               Cancel
             </Button>
@@ -222,11 +244,23 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   onCancelEdit() {
-    this.setState({
-      activeUaSpecIdx: -1,
-      isEditDialogOpen: false,
-      editedUaSpec: null,
-    });
+    this.setState(
+      {
+        isEditDialogOpen: false,
+      },
+      () =>
+        // The edit dialog's dismissal will be animated, so immediately resetting editedUaSpec will
+        // result in a "flash" of the edit dialog in an invalid state. To address this, we use a
+        // setTimeout to reset editedUaSpec only after the edit dialog is fully hidden.
+        setTimeout(
+          () =>
+            this.setState({
+              activeUaSpecIdx: -1,
+              editedUaSpec: null,
+            }),
+          100
+        )
+    );
   }
 
   onConfirmEdit() {
@@ -237,11 +271,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         State.addUaSpec(this.state.editedUaSpec);
       }
     }
-    this.setState({
-      activeUaSpecIdx: -1,
-      isEditDialogOpen: false,
-      editedUaSpec: null,
-    });
+    this.onCancelEdit();
   }
 
   onEditFieldChange(
@@ -255,16 +285,14 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     });
   }
 
-  onDelete(idx: number) {
+  onDelete() {
     this.setState({
-      activeUaSpecIdx: idx,
       isDeleteConfirmationDialogOpen: true,
     });
   }
 
   onCancelDelete() {
     this.setState({
-      activeUaSpecIdx: -1,
       isDeleteConfirmationDialogOpen: false,
     });
   }
@@ -272,9 +300,9 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   onConfirmDelete() {
     State.deleteUaSpec(this.state.activeUaSpecIdx);
     this.setState({
-      activeUaSpecIdx: -1,
       isDeleteConfirmationDialogOpen: false,
     });
+    this.onCancelEdit();
   }
 
   onAdd() {
