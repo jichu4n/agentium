@@ -7,6 +7,7 @@ import {
   reaction,
   runInAction,
   toJS,
+  makeObservable,
 } from 'mobx';
 import UaSpec from 'src/lib/ua-spec';
 import {browser} from 'webextension-polyfill-ts';
@@ -120,6 +121,7 @@ class State {
   isStoring = false;
 
   constructor() {
+    makeObservable(this);
     window['STATE'] = this;
     this.initialLoad();
   }
