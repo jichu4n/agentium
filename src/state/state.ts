@@ -122,7 +122,7 @@ class State {
 
   constructor() {
     makeObservable(this);
-    window['STATE'] = this;
+    (window as {[key: string]: any})['STATE'] = this;
     this.initialLoad();
   }
 

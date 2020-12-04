@@ -14,18 +14,7 @@
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts-ts": "3.1.0",
     "webextension-polyfill-ts": "^0.22.0"
-  },
-  "scripts": {
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build && misc/post-build.sh",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "watch": "misc/watch.sh",
-    "build-edge": "npm run build && packaging/edge/build-edge.sh",
-    "build-firefox": "npm run build && packaging/firefox/build-firefox.sh",
-    "build-chrome": "packaging/chrome/build-chrome.sh"
   },
   "devDependencies": {
     "@types/detect-browser": "^4.0.0",
@@ -37,6 +26,35 @@
     "@types/react-router-dom": "^5.1.6",
     "manifoldjs": "^0.7.6",
     "onchange": "^7.1.0",
+    "react-scripts": "^4.0.1",
     "typescript": "^4.1.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && misc/post-build.sh",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "watch": "misc/watch.sh",
+    "build-edge": "npm run build && packaging/edge/build-edge.sh",
+    "build-firefox": "npm run build && packaging/firefox/build-firefox.sh",
+    "build-chrome": "packaging/chrome/build-chrome.sh"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

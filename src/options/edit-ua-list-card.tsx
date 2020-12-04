@@ -244,10 +244,13 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     });
   }
 
-  onEditFieldChange(field: string, event: Event) {
+  onEditFieldChange(
+    field: string,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     this.setState({
       editedUaSpec: Object.assign({}, this.state.editedUaSpec, {
-        [field]: event.target!['value'],
+        [field]: event.target.value,
       }),
     });
   }
