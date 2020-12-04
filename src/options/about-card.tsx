@@ -11,7 +11,7 @@ import './about-card.css';
 
 class AboutCard extends React.Component<{}, {}> {
   render() {
-    let manifest = browser.runtime.getManifest();
+    const manifest = browser.runtime.getManifest();
     return (
       <Paper>
         <CardTitle text="About" />

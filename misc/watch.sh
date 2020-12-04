@@ -6,8 +6,7 @@ set -ex
 onchange \
   -i \
   '**/*' \
-  -e 'build/**/*' \
-  -e 'build-edge/**/*' \
+  --exclude-path .gitignore \
   --await-write-finish 2000 \
   -- \
   npm run build

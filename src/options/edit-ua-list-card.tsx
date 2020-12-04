@@ -74,10 +74,20 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
                   },
                 }}
               />
-              <IconButton onClick={() => this.onMoveUp(idx)}>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.onMoveUp(idx);
+                }}
+              >
                 <ArrowUpward />
               </IconButton>
-              <IconButton onClick={() => this.onMoveDown(idx)}>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.onMoveDown(idx);
+                }}
+              >
                 <ArrowDownward />
               </IconButton>
             </ListItem>
@@ -91,6 +101,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
             color="primary"
             onClick={() => this.onReset()}
             disabled={State.isUaSpecListSameAsDefault()}
+            style={{marginLeft: 'auto'}}
           >
             Reset to default
           </Button>
@@ -233,11 +244,23 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   onCancelEdit() {
-    this.setState({
-      activeUaSpecIdx: -1,
-      isEditDialogOpen: false,
-      editedUaSpec: null,
-    });
+    this.setState(
+      {
+        isEditDialogOpen: false,
+      },
+      () =>
+        // The edit dialog's dismissal will be animated, so immediately resetting editedUaSpec will
+        // result in a "flash" of the edit dialog in an invalid state. To address this, we use a
+        // setTimeout to reset editedUaSpec only after the edit dialog is fully hidden.
+        setTimeout(
+          () =>
+            this.setState({
+              activeUaSpecIdx: -1,
+              editedUaSpec: null,
+            }),
+          100
+        )
+    );
   }
 
   onConfirmEdit() {
@@ -248,11 +271,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         State.addUaSpec(this.state.editedUaSpec);
       }
     }
-    this.setState({
-      activeUaSpecIdx: -1,
-      isEditDialogOpen: false,
-      editedUaSpec: null,
-    });
+    this.onCancelEdit();
   }
 
   onEditFieldChange(
@@ -281,10 +300,9 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   onConfirmDelete() {
     State.deleteUaSpec(this.state.activeUaSpecIdx);
     this.setState({
-      activeUaSpecIdx: -1,
-      isEditDialogOpen: false,
       isDeleteConfirmationDialogOpen: false,
     });
+    this.onCancelEdit();
   }
 
   onAdd() {
