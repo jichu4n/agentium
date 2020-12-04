@@ -22,6 +22,7 @@ import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import UaSpec from 'src/lib/ua-spec';
 import State from 'src/state/state';
+import {v4 as uuidv4} from 'uuid';
 import './edit-ua-list-card.css';
 
 interface EditUaListCardState {
@@ -32,7 +33,7 @@ interface EditUaListCardState {
   editedUaSpec: UaSpec | null;
 }
 
-const NEW_UA_SPEC: UaSpec = {
+const NEW_UA_SPEC: Omit<UaSpec, 'id'> = {
   deviceType: 'desktop',
   name: '',
   value: '',
@@ -309,7 +310,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     this.setState({
       activeUaSpecIdx: -1,
       isEditDialogOpen: true,
-      editedUaSpec: {...NEW_UA_SPEC},
+      editedUaSpec: {...NEW_UA_SPEC, id: uuidv4()},
     });
   }
 

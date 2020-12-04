@@ -14,6 +14,7 @@
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
+    "uuid": "^8.3.1",
     "webextension-polyfill-ts": "^0.22.0"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "@types/react-dom": "^17.0.0",
     "@types/react-helmet": "^6.1.0",
     "@types/react-router-dom": "^5.1.6",
+    "@types/uuid": "^8.3.0",
     "manifoldjs": "^0.7.6",
     "onchange": "^7.1.0",
     "react-scripts": "^4.0.1",
