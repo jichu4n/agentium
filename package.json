@@ -3,41 +3,58 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^3.3.2",
-    "@material-ui/icons": "^3.0.1",
-    "detect-browser": "^3.0.1",
-    "lodash": "^4.17.11",
-    "mobx": "^5.5.2",
-    "mobx-react": "^5.3.6",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0",
-    "react-helmet": "^5.2.0",
-    "react-router-dom": "^4.3.1",
-    "react-scripts-ts": "3.1.0",
-    "typeface-roboto": "^0.0.54",
-    "webextension-polyfill-ts": "^0.8.9"
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "detect-browser": "^5.2.0",
+    "fontsource-roboto": "^3.0.3",
+    "lodash": "^4.17.20",
+    "mobx": "^6.0.4",
+    "mobx-react": "^7.0.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^5.2.0",
+    "webextension-polyfill-ts": "^0.22.0"
+  },
+  "devDependencies": {
+    "@types/detect-browser": "^4.0.0",
+    "@types/lodash": "^4.14.165",
+    "@types/node": "^14.14.10",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-helmet": "^6.1.0",
+    "@types/react-router-dom": "^5.1.6",
+    "manifoldjs": "^0.7.6",
+    "onchange": "^7.1.0",
+    "react-scripts": "^4.0.1",
+    "typescript": "^4.1.2"
   },
   "scripts": {
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build && misc/post-build.sh",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
+    "start": "react-scripts start",
+    "build": "react-scripts build && misc/post-build.sh",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "watch": "misc/watch.sh",
     "build-edge": "npm run build && packaging/edge/build-edge.sh",
     "build-firefox": "npm run build && packaging/firefox/build-firefox.sh",
     "build-chrome": "packaging/chrome/build-chrome.sh"
   },
-  "devDependencies": {
-    "@types/detect-browser": "^2.0.1",
-    "@types/jest": "^23.3.8",
-    "@types/lodash": "^4.14.117",
-    "@types/node": "^10.12.1",
-    "@types/react": "^16.4.18",
-    "@types/react-dom": "^16.0.9",
-    "@types/react-helmet": "^5.0.7",
-    "@types/react-router-dom": "^4.3.1",
-    "manifoldjs": "^0.7.6",
-    "onchange": "^5.0.2",
-    "typescript": "^3.1.4"
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

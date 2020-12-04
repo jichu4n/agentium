@@ -2,8 +2,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Avatar from '@material-ui/core/Avatar';
 import yellow from '@material-ui/core/colors/yellow';
 import Grid from '@material-ui/core/Grid';
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import {createMuiTheme, MuiThemeProvider} from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {observer} from 'mobx-react';
@@ -40,7 +39,7 @@ class OptionsView extends React.Component<{}, {}> {
         <MuiThemeProvider theme={APP_BAR_THEME}>
           <AppBar position="fixed">
             <Toolbar>
-              <Avatar src="/icon-128.png" className="appbar-icon" />
+              <Avatar src="/icon-128.png" classes={{root: 'appbar-icon'}} />
               <Typography variant="h6" color="inherit">
                 Settings
               </Typography>
@@ -49,11 +48,13 @@ class OptionsView extends React.Component<{}, {}> {
         </MuiThemeProvider>
         <Grid
           container={true}
-          spacing={16}
+          spacing={2}
           direction="row"
           justify="center"
           alignItems="center"
-          className="options-cards-container"
+          classes={{
+            root: 'options-cards-container',
+          }}
         >
           <CardWrapper>
             <EditUaListCard />

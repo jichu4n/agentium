@@ -6,11 +6,11 @@ import './card-title.css';
 class CardTitle extends React.Component<{text: string}, {}> {
   render() {
     return (
-      <CardContent className="card-title">
+      <CardContent classes={{root: 'card-title'}}>
         <Typography
           variant="button"
           color="textSecondary"
-          className="card-title-span"
+          classes={{root: 'card-title-span'}}
         >
           {this.props.text}
         </Typography>

@@ -20,7 +20,9 @@ class ToggleEnabledCard extends React.Component<{}, {}> {
         <CardActionArea onClick={() => State.toggleEnabled()}>
           <CardMedia
             component="img"
-            className="toggle-enabled-button"
+            classes={{
+              media: 'toggle-enabled-button',
+            }}
             image={
               State.isEnabledAndHasValidUaSpec()
                 ? '/power-active.png'

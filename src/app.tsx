@@ -2,7 +2,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import {configure} from 'mobx';
 import * as React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
-import 'typeface-roboto';
+import 'fontsource-roboto/latin.css';
 import './app.css';
 import BackgroundView from './background/background-view';
 import OptionsView from './options/options-view';

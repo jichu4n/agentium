@@ -16,7 +16,7 @@ class AboutCard extends React.Component<{}, {}> {
       <Paper>
         <CardTitle text="About" />
         <CardHeader
-          avatar={<Avatar src="/icon-128.png" className="about-icon" />}
+          avatar={<Avatar src="/icon-128.png" classes={{root: 'about-icon'}} />}
           title={manifest.name}
           subheader={manifest.version}
         />
