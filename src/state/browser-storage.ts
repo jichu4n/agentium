@@ -77,7 +77,7 @@ class BrowserStorage {
   }
 
   edgeSet(store: EdgeStorageArea, data: {[key: string]: any}) {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       store.set(data, resolve);
     });
   }
