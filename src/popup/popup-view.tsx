@@ -17,7 +17,7 @@ class PopupView extends React.Component<{}, {}> {
         <Helmet>
           <body className="popup-view" />
         </Helmet>
-        <Grid container={true} spacing={8} direction="column">
+        <Grid container={true} spacing={1} direction="column">
           <Grid item={true} xs={true}>
             <ToggleEnabledCard />
           </Grid>

@@ -126,7 +126,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
                 label="Form factor"
                 value={this.state.editedUaSpec.deviceType}
                 onChange={this.onEditFieldChange.bind(this, 'deviceType')}
-                className="select-field"
+                classes={{root: 'select-field'}}
               >
                 <MenuItem key="desktop" value="desktop">
                   Desktop

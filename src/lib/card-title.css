@@ -4,5 +4,5 @@
 
 .card-title-span {
   font-size: 0.85rem !important;
-  letter-spacing: 0.04rem;
+  letter-spacing: 0.04rem !important;
 }
