@@ -1,24 +1,36 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {
   action,
   computed,
   IObservableArray,
+  makeObservable,
   observable,
   reaction,
   runInAction,
   toJS,
-  makeObservable,
 } from 'mobx';
 import UaSpec from 'src/lib/ua-spec';
+import {v4 as uuidv4} from 'uuid';
 import {browser} from 'webextension-polyfill-ts';
 import BrowserStorage from './browser-storage';
 import DEFAULT_UA_SPEC_LIST from './default-ua-spec-list';
 
-const UA_SPEC_LIST = 'v1/uaSpecList';
-const SELECTED_UA_SPEC_IDX = 'v1/selectedUaSpecIdx';
+// Deprecated - index-based storage scheme, no IDs.
+const V1_UA_SPEC_LIST = 'v1/uaSpecList';
+const V1_SELECTED_UA_SPEC_IDX = 'v1/selectedUaSpecIdx';
+
+// Current - ID-based storage scheme.
+const V2_UA_SPEC_LIST = 'v2/uaSpecList';
+const V2_SELECTED_UA_SPEC_ID = 'v2/selectedUaSpecId';
+
 const IS_ENABLED = 'v1/isEnabled';
 const STORAGE_KEYS = {
-  sync: [UA_SPEC_LIST, SELECTED_UA_SPEC_IDX],
+  sync: [
+    V1_UA_SPEC_LIST,
+    V1_SELECTED_UA_SPEC_IDX,
+    V2_UA_SPEC_LIST,
+    V2_SELECTED_UA_SPEC_ID,
+  ],
   local: [IS_ENABLED],
 };
 const DEFAULT_UA_SPEC_LIST_STRING = JSON.stringify(DEFAULT_UA_SPEC_LIST);
@@ -27,7 +39,7 @@ class State {
   @observable
   public uaSpecList: IObservableArray<UaSpec> = observable([]);
   @observable
-  public selectedUaSpecIdx = 0;
+  public selectedUaSpecId: string | null = null;
   @observable
   public isEnabled = false;
 
@@ -40,21 +52,22 @@ class State {
   }
 
   @action
-  public setSelectedUaSpecIdx(idx: number) {
-    if (idx >= 0 && idx < this.uaSpecList.length) {
-      this.selectedUaSpecIdx = idx;
+  public setSelectedUaSpecId(id: string) {
+    if (_.has(this.uaSpecListById, id)) {
+      this.selectedUaSpecId = id;
     }
   }
 
   @computed
   public get selectedUaSpec() {
-    if (
-      this.selectedUaSpecIdx < 0 ||
-      this.selectedUaSpecIdx >= this.uaSpecList.length
-    ) {
+    if (this.selectedUaSpecId === null) {
       return null;
     }
-    return this.uaSpecList[this.selectedUaSpecIdx];
+    return this.uaSpecListById[this.selectedUaSpecId] ?? null;
+  }
+
+  public getUaSpec(id: string): UaSpec | null {
+    return this.uaSpecListById[id] ?? null;
   }
 
   public isEnabledAndHasValidUaSpec() {
@@ -62,7 +75,8 @@ class State {
   }
 
   @action
-  public moveUaSpecDown(idx: number) {
+  public moveUaSpecDown(id: string) {
+    const idx = this.getUaSpecListIdx(id);
     if (idx < 0 || idx >= this.uaSpecList.length - 1) {
       return;
     }
@@ -72,11 +86,20 @@ class State {
       this.uaSpecList[idx + 1],
       this.uaSpecList[idx]
     );
-    if (this.selectedUaSpecIdx == idx) {
-      this.selectedUaSpecIdx = idx + 1;
-    } else if (this.selectedUaSpecIdx == idx + 1) {
-      this.selectedUaSpecIdx = idx;
+  }
+
+  @action
+  public moveUaSpecUp(id: string) {
+    const idx = this.getUaSpecListIdx(id);
+    if (idx <= 0) {
+      return;
     }
+    this.uaSpecList.splice(
+      idx - 1,
+      2,
+      this.uaSpecList[idx],
+      this.uaSpecList[idx - 1]
+    );
   }
 
   @action
@@ -85,21 +108,22 @@ class State {
   }
 
   @action
-  public deleteUaSpec(idx: number) {
-    if (idx < 0 || idx >= this.uaSpecList.length) {
+  public deleteUaSpec(id: string) {
+    const idx = this.getUaSpecListIdx(id);
+    if (idx < 0) {
       return;
     }
     this.uaSpecList.splice(idx, 1);
-    if (this.selectedUaSpecIdx == idx || this.uaSpecList.length == 0) {
-      this.selectedUaSpecIdx = 0;
-      this.isEnabled = false;
-    } else if (this.selectedUaSpecIdx > idx) {
-      --this.selectedUaSpecIdx;
+    if (this.uaSpecList.length === 0) {
+      this.resetUaSpecListToDefault();
+    } else if (this.selectedUaSpecId === id) {
+      this.selectedUaSpecId = this.uaSpecList[0].id;
     }
   }
 
   @action
-  public updateUaSpec(idx: number, uaSpec: UaSpec) {
+  public updateUaSpec(id: string, uaSpec: UaSpec) {
+    const idx = this.getUaSpecListIdx(id);
     if (idx < 0 || idx >= this.uaSpecList.length) {
       return;
     }
@@ -109,7 +133,7 @@ class State {
   @action
   public resetUaSpecListToDefault() {
     this.uaSpecList.replace(DEFAULT_UA_SPEC_LIST);
-    this.selectedUaSpecIdx = 0;
+    this.selectedUaSpecId = DEFAULT_UA_SPEC_LIST[0].id;
     this.isEnabled = false;
   }
 
@@ -132,30 +156,39 @@ class State {
     console.info('LOAD START');
     let result = Object.assign(
       {},
-      await BrowserStorage.syncGet([UA_SPEC_LIST, SELECTED_UA_SPEC_IDX]),
+      await BrowserStorage.syncGet([V2_UA_SPEC_LIST, V2_SELECTED_UA_SPEC_ID]),
       await BrowserStorage.localGet([IS_ENABLED])
     );
     runInAction(() => {
-      if (_.has(result, UA_SPEC_LIST)) {
+      // Load uaSpecList.
+      this.uaSpecList.clear();
+      if (_.has(result, V2_UA_SPEC_LIST)) {
+        console.log(`${V2_UA_SPEC_LIST}: ${result[V2_UA_SPEC_LIST]}`);
         try {
-          this.uaSpecList.replace(JSON.parse(result[UA_SPEC_LIST]));
+          this.uaSpecList.replace(JSON.parse(result[V2_UA_SPEC_LIST]));
         } catch (e) {}
       }
-      if (this.uaSpecList.length == 0) {
+      if (this.uaSpecList.length === 0) {
         this.uaSpecList.replace(DEFAULT_UA_SPEC_LIST);
       }
-      if (_.has(result, SELECTED_UA_SPEC_IDX)) {
-        this.selectedUaSpecIdx = result[SELECTED_UA_SPEC_IDX];
+
+      // Load selectedUaSpecId.
+      if (_.has(result, V2_SELECTED_UA_SPEC_ID)) {
+        console.log(
+          `${V2_SELECTED_UA_SPEC_ID}: ${result[V2_SELECTED_UA_SPEC_ID]}`
+        );
+        this.selectedUaSpecId = result[V2_SELECTED_UA_SPEC_ID];
       }
-      this.selectedUaSpecIdx = Math.min(
-        Math.max(this.selectedUaSpecIdx, 0),
-        this.uaSpecList.length - 1
-      );
+      if (
+        !this.selectedUaSpecId ||
+        !_.find(this.uaSpecList, ['id', this.selectedUaSpecId])
+      ) {
+        this.selectedUaSpecId = this.uaSpecList[0].id;
+      }
+
+      // Load isEnabled.
       if (_.has(result, IS_ENABLED)) {
         this.isEnabled = result[IS_ENABLED];
-      }
-      if (this.isEnabled && this.selectedUaSpec == null) {
-        this.isEnabled = false;
       }
     });
     console.info('LOAD END');
@@ -163,10 +196,11 @@ class State {
   }
 
   async initialLoad() {
+    await this.migrateFromV1UaSpecList();
     await this.load();
     browser.storage.onChanged.addListener(this.onStorageChanged.bind(this));
     reaction(
-      () => [toJS(this.uaSpecList), this.selectedUaSpecIdx, this.isEnabled],
+      () => [toJS(this.uaSpecList), this.selectedUaSpecId, this.isEnabled],
       () => this.onStateChanged()
     );
   }
@@ -176,11 +210,11 @@ class State {
     console.info('STORE START');
     let uaSpecListString = JSON.stringify(toJS(this.uaSpecList));
     await BrowserStorage.syncSet({
-      [UA_SPEC_LIST]:
-        uaSpecListString == DEFAULT_UA_SPEC_LIST_STRING
+      [V2_UA_SPEC_LIST]:
+        uaSpecListString === DEFAULT_UA_SPEC_LIST_STRING
           ? '[]'
           : uaSpecListString,
-      [SELECTED_UA_SPEC_IDX]: this.selectedUaSpecIdx,
+      [V2_SELECTED_UA_SPEC_ID]: this.selectedUaSpecId,
     });
     await BrowserStorage.localSet({
       [IS_ENABLED]: this.isEnabled,
@@ -202,6 +236,78 @@ class State {
     if (!this.isLoading) {
       this.store();
     }
+  }
+
+  async migrateFromV1UaSpecList() {
+    const result = await BrowserStorage.syncGet([
+      V1_UA_SPEC_LIST,
+      V1_SELECTED_UA_SPEC_IDX,
+      V2_UA_SPEC_LIST,
+      V2_SELECTED_UA_SPEC_ID,
+    ]);
+    if (
+      _.has(result, V2_UA_SPEC_LIST) ||
+      _.has(result, V2_SELECTED_UA_SPEC_ID) ||
+      !_.has(result, V1_UA_SPEC_LIST) ||
+      !_.has(result, V1_SELECTED_UA_SPEC_IDX)
+    ) {
+      return;
+    }
+
+    // Migrate V1_UA_SPEC_LIST to V2_UA_SPEC_LIST.
+    let v2UaSpecList: Array<UaSpec> = [];
+    if (_.has(result, V1_UA_SPEC_LIST)) {
+      let v1UaSpecList: Array<Omit<UaSpec, 'id'>> = [];
+      try {
+        v1UaSpecList = JSON.parse(result[V1_UA_SPEC_LIST]);
+      } catch (e) {}
+      if (Array.isArray(v1UaSpecList) && v1UaSpecList.length > 0) {
+        v2UaSpecList = v1UaSpecList.map((uaSpec) => ({
+          id: uuidv4(),
+          ...uaSpec,
+        }));
+      }
+      await BrowserStorage.syncRemove([V1_UA_SPEC_LIST]);
+      await BrowserStorage.syncSet({
+        [V2_UA_SPEC_LIST]: JSON.stringify(v2UaSpecList),
+      });
+    }
+
+    // Migrate V1_SELECTED_UA_SPEC_IDX to V2_SELECTED_UA_SPEC_ID.
+    if (v2UaSpecList.length === 0) {
+      v2UaSpecList = DEFAULT_UA_SPEC_LIST;
+    }
+    if (_.has(result, V1_SELECTED_UA_SPEC_IDX)) {
+      await BrowserStorage.syncRemove([V1_SELECTED_UA_SPEC_IDX]);
+      if (
+        _.isFinite(result[V1_SELECTED_UA_SPEC_IDX]) &&
+        result[V1_SELECTED_UA_SPEC_IDX] >= 0 &&
+        result[V1_SELECTED_UA_SPEC_IDX] < v2UaSpecList.length
+      ) {
+        const v2SelectedUaSpecId =
+          v2UaSpecList[result[V1_SELECTED_UA_SPEC_IDX]].id;
+        await BrowserStorage.syncSet({
+          [V2_SELECTED_UA_SPEC_ID]: v2SelectedUaSpecId,
+        });
+      }
+    }
+  }
+
+  @computed
+  get uaSpecListById() {
+    return _.keyBy(this.uaSpecList, 'id');
+  }
+
+  @computed
+  get uaSpecListIdxById() {
+    return _(this.uaSpecList)
+      .map(({id}, idx) => [id, idx] as [string, number])
+      .fromPairs()
+      .value();
+  }
+
+  getUaSpecListIdx(id: string) {
+    return this.uaSpecListIdxById[id] ?? -1;
   }
 }
 

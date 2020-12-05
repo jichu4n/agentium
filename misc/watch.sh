@@ -5,6 +5,7 @@ set -ex
 
 onchange \
   -i \
+  -v \
   '**/*' \
   --exclude-path .gitignore \
   --await-write-finish 2000 \

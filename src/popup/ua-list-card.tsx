@@ -22,20 +22,20 @@ class UaListCard extends React.Component<{}, {}> {
       <Card>
         <CardTitle text="User agents" />
         <List>
-          {State.uaSpecList.map((uaSpec, idx) => (
+          {State.uaSpecList.map((uaSpec) => (
             <ListItem
-              key={idx}
+              key={uaSpec.id}
               button={true}
               dense={true}
-              onClick={() => State.setSelectedUaSpecIdx(idx)}
-              selected={idx == State.selectedUaSpecIdx}
+              onClick={() => State.setSelectedUaSpecId(uaSpec.id)}
+              selected={uaSpec.id === State.selectedUaSpecId}
             >
               <Radio
-                value={idx}
+                value={uaSpec.id}
                 color="default"
                 icon={<RadioButtonUnchecked />}
                 checkedIcon={<RadioButtonChecked />}
-                checked={idx == State.selectedUaSpecIdx}
+                checked={uaSpec.id === State.selectedUaSpecId}
               />
               <ListItemText primary={uaSpec.name} />
               <ListItemIcon>
