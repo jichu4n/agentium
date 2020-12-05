@@ -26,7 +26,7 @@ import {v4 as uuidv4} from 'uuid';
 import './edit-ua-list-card.css';
 
 interface EditUaListCardState {
-  activeUaSpecIdx: number;
+  activeUaSpecId: string | null;
   isDeleteConfirmationDialogOpen: boolean;
   isResetConfirmationDialogOpen: boolean;
   isEditDialogOpen: boolean;
@@ -44,7 +44,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      activeUaSpecIdx: -1,
+      activeUaSpecId: null,
       isDeleteConfirmationDialogOpen: false,
       isResetConfirmationDialogOpen: false,
       isEditDialogOpen: false,
@@ -53,15 +53,13 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   render() {
-    let activeUaSpec = this.hasActiveUaSpec()
-      ? State.uaSpecList[this.state.activeUaSpecIdx]
-      : null;
+    const activeUaSpec = this.getActiveUaSpec();
     return (
       <Paper>
         <CardTitle text="User agents" />
         <List>
-          {State.uaSpecList.map((uaSpec, idx) => (
-            <ListItem button={true} onClick={() => this.onEdit(idx)}>
+          {State.uaSpecList.map((uaSpec) => (
+            <ListItem button={true} onClick={() => this.onEdit(uaSpec.id)}>
               <ListItemIcon>
                 <DeviceTypeIcon deviceType={uaSpec.deviceType} />
               </ListItemIcon>
@@ -78,7 +76,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  this.onMoveUp(idx);
+                  this.onMoveUp(uaSpec.id);
                 }}
               >
                 <ArrowUpward />
@@ -86,7 +84,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  this.onMoveDown(idx);
+                  this.onMoveDown(uaSpec.id);
                 }}
               >
                 <ArrowDownward />
@@ -172,12 +170,12 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
               onClick={() => this.onConfirmEdit()}
               disabled={
                 this.state.editedUaSpec == null ||
-                this.state.editedUaSpec.name.trim().length == 0 ||
-                this.state.editedUaSpec.value.trim().length == 0 ||
+                this.state.editedUaSpec.name.trim().length === 0 ||
+                this.state.editedUaSpec.value.trim().length === 0 ||
                 (this.hasActiveUaSpec() &&
                   _.isEqual(
                     this.state.editedUaSpec,
-                    State.uaSpecList[this.state.activeUaSpecIdx]
+                    State.getUaSpec(this.state.activeUaSpecId!)
                   ))
               }
             >
@@ -189,7 +187,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         <Dialog open={this.state.isDeleteConfirmationDialogOpen}>
           <DialogContent>
             <DialogContentText>
-              {activeUaSpec == null
+              {activeUaSpec === null
                 ? ''
                 : `Delete user agent "${activeUaSpec.name}"?`}
             </DialogContentText>
@@ -225,22 +223,23 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     );
   }
 
-  onMoveUp(idx: number) {
-    if (idx <= 0) {
+  onMoveUp(id: string) {
+    State.moveUaSpecUp(id);
+  }
+
+  onMoveDown(id: string) {
+    State.moveUaSpecDown(id);
+  }
+
+  onEdit(id: string) {
+    const uaSpec = State.getUaSpec(id);
+    if (!uaSpec) {
       return;
     }
-    State.moveUaSpecDown(idx - 1);
-  }
-
-  onMoveDown(idx: number) {
-    State.moveUaSpecDown(idx);
-  }
-
-  onEdit(idx: number) {
     this.setState({
-      activeUaSpecIdx: idx,
+      activeUaSpecId: id,
       isEditDialogOpen: true,
-      editedUaSpec: {...State.uaSpecList[idx]},
+      editedUaSpec: {...uaSpec},
     });
   }
 
@@ -256,7 +255,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         setTimeout(
           () =>
             this.setState({
-              activeUaSpecIdx: -1,
+              activeUaSpecId: null,
               editedUaSpec: null,
             }),
           100
@@ -267,7 +266,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   onConfirmEdit() {
     if (this.state.editedUaSpec != null) {
       if (this.hasActiveUaSpec()) {
-        State.updateUaSpec(this.state.activeUaSpecIdx, this.state.editedUaSpec);
+        State.updateUaSpec(this.state.activeUaSpecId!, this.state.editedUaSpec);
       } else {
         State.addUaSpec(this.state.editedUaSpec);
       }
@@ -299,7 +298,9 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   onConfirmDelete() {
-    State.deleteUaSpec(this.state.activeUaSpecIdx);
+    if (this.hasActiveUaSpec()) {
+      State.deleteUaSpec(this.state.activeUaSpecId!);
+    }
     this.setState({
       isDeleteConfirmationDialogOpen: false,
     });
@@ -308,7 +309,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
 
   onAdd() {
     this.setState({
-      activeUaSpecIdx: -1,
+      activeUaSpecId: null,
       isEditDialogOpen: true,
       editedUaSpec: {...NEW_UA_SPEC, id: uuidv4()},
     });
@@ -335,9 +336,15 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
 
   hasActiveUaSpec() {
     return (
-      this.state.activeUaSpecIdx >= 0 &&
-      this.state.activeUaSpecIdx < State.uaSpecList.length
+      !!this.state.activeUaSpecId &&
+      !!State.getUaSpec(this.state.activeUaSpecId)
     );
+  }
+
+  getActiveUaSpec() {
+    return this.state.activeUaSpecId
+      ? State.getUaSpec(this.state.activeUaSpecId)
+      : null;
   }
 }
 

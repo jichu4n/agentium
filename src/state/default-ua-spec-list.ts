@@ -48,7 +48,7 @@ const DEFAULT_UA_SPEC_LIST: Array<UaSpec> = [
     deviceType: 'mobile',
     name: 'Safari (iPhone)',
     value:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1',
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_9 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Mobile/15E148 Safari/604.1',
   },
   {
     id: 'f4e15410-f513-4aea-b733-2bd6b4cf5011',

@@ -6,6 +6,7 @@ declare var browser: any;
 interface EdgeStorageArea {
   get: (keys: Array<string>, cb: (result: {[s: string]: any}) => any) => void;
   set: (data: {[s: string]: any}, cb: () => void) => void;
+  remove: (keys: Array<string>, cb: () => void) => void;
 }
 
 /**
@@ -30,9 +31,18 @@ class BrowserStorage {
     return this.setFn(this.syncStore, data);
   }
 
+  public localRemove(keys: Array<string>) {
+    return this.removeFn(this.localStore, keys);
+  }
+
+  public syncRemove(keys: Array<string>) {
+    return this.removeFn(this.syncStore, keys);
+  }
+
   browserName = '';
   getFn: (store: any, keys: Array<string>) => Promise<{[key: string]: any}>;
   setFn: (store: any, data: {[key: string]: any}) => Promise<void>;
+  removeFn: (store: any, keys: Array<string>) => Promise<void>;
   localStore: any;
   syncStore: any;
 
@@ -41,16 +51,18 @@ class BrowserStorage {
     if (detectedBrowser && detectedBrowser.name) {
       this.browserName = detectedBrowser.name;
     }
-    if (this.browserName == 'edge') {
+    if (this.browserName === 'edge') {
       console.info('Using Edge polyfill for browser storage');
       this.getFn = this.edgeGet.bind(this);
       this.setFn = this.edgeSet.bind(this);
+      this.removeFn = this.edgeRemove.bind(this);
       this.localStore = browser.storage.local;
       this.syncStore = browser.storage.sync;
     } else {
       console.info('Using Chrome / Firefox polyfill for browser storage');
       this.getFn = this.polyfillGet.bind(this);
       this.setFn = this.polyfillSet.bind(this);
+      this.removeFn = this.polyfillRemove.bind(this);
       this.localStore = webextensionPolyfill.browser.storage.local;
       this.syncStore = webextensionPolyfill.browser.storage.sync;
     }
@@ -70,6 +82,13 @@ class BrowserStorage {
     return store.set(data);
   }
 
+  polyfillRemove(
+    store: webextensionPolyfill.Storage.StorageArea,
+    keys: Array<string>
+  ) {
+    return store.remove(keys);
+  }
+
   edgeGet(store: EdgeStorageArea, keys: Array<string>) {
     return new Promise<{[key: string]: any}>((resolve) => {
       store.get(keys, resolve);
@@ -79,6 +98,12 @@ class BrowserStorage {
   edgeSet(store: EdgeStorageArea, data: {[key: string]: any}) {
     return new Promise<void>((resolve) => {
       store.set(data, resolve);
+    });
+  }
+
+  edgeRemove(store: EdgeStorageArea, keys: Array<string>) {
+    return new Promise<void>((resolve) => {
+      store.remove(keys, resolve);
     });
   }
 }

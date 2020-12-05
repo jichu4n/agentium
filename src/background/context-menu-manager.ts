@@ -28,9 +28,7 @@ class ContextMenuManager {
         break;
       default:
         if (menuItemId.startsWith(UA_SPEC_PREFIX)) {
-          this.onSelectUaSpec(
-            parseInt(menuItemId.substr(UA_SPEC_PREFIX.length))
-          );
+          this.onSelectUaSpec(menuItemId.substr(UA_SPEC_PREFIX.length));
         }
         break;
     }
@@ -40,13 +38,13 @@ class ContextMenuManager {
     State.toggleEnabled();
   }
 
-  onSelectUaSpec(idx: number) {
-    State.setSelectedUaSpecIdx(idx);
+  onSelectUaSpec(id: string) {
+    State.setSelectedUaSpecId(id);
   }
 
   onStateChange() {
     browser.contextMenus.removeAll();
-    if (State.selectedUaSpec != null && State.uaSpecList.length > 0) {
+    if (State.selectedUaSpec !== null && State.uaSpecList.length > 0) {
       browser.contextMenus.create({
         contexts: ['browser_action'],
         id: TOGGLE_ENABLED,
@@ -60,12 +58,12 @@ class ContextMenuManager {
       id: UA_SPEC_LIST,
       title: 'Choose user agent',
     });
-    State.uaSpecList.forEach((uaSpec, idx) => {
+    State.uaSpecList.forEach((uaSpec) => {
       browser.contextMenus.create({
         contexts: ['browser_action'],
         type: 'radio',
-        checked: idx == State.selectedUaSpecIdx,
-        id: `${UA_SPEC_PREFIX}${idx}`,
+        checked: uaSpec.id === State.selectedUaSpecId,
+        id: `${UA_SPEC_PREFIX}${uaSpec.id}`,
         title: uaSpec.name,
         parentId: UA_SPEC_LIST,
       });
