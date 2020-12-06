@@ -33,11 +33,122 @@ interface EditUaListCardState {
   editedUaSpec: UaSpec | null;
 }
 
+/** Template for creating a new UaSpec. */
 const NEW_UA_SPEC: Omit<UaSpec, 'id'> = {
   deviceType: 'desktop',
   name: '',
   value: '',
 };
+
+function DeleteConfirmationDialog({
+  isOpen,
+  uaSpec,
+  onCancel,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  uaSpec: UaSpec | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!uaSpec) {
+    return null;
+  }
+  return (
+    <Dialog open={isOpen}>
+      <DialogContent>
+        <DialogContentText>
+          {`Delete user agent "${uaSpec.name}"?`}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button color="primary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button color="primary" onClick={onConfirm}>
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function ResetConfirmationDialog({
+  isOpen,
+  onCancel,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog open={isOpen}>
+      <DialogTitle>Reset to default?</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          This will undo any changes you have made to this list, and will remove
+          any custom user agent configurations you have added.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button color="primary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button color="primary" onClick={onConfirm}>
+          Reset
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+/** An item in the list of UAs. */
+function EditUaListItem({
+  uaSpec,
+  onClick,
+  onMoveUpClick,
+  onMoveDownClick,
+}: {
+  uaSpec: UaSpec;
+  onClick: () => void;
+  onMoveUpClick: () => void;
+  onMoveDownClick: () => void;
+}) {
+  return (
+    <ListItem button={true} onClick={onClick}>
+      <ListItemIcon>
+        <DeviceTypeIcon deviceType={uaSpec.deviceType} />
+      </ListItemIcon>
+      <ListItemText
+        primary={uaSpec.name}
+        secondary={uaSpec.value}
+        style={{width: 'max-content', maxWidth: 400}}
+        secondaryTypographyProps={{
+          style: {
+            wordBreak: 'break-all',
+          },
+        }}
+      />
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onMoveUpClick();
+        }}
+      >
+        <ArrowUpward />
+      </IconButton>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onMoveDownClick();
+        }}
+      >
+        <ArrowDownward />
+      </IconButton>
+    </ListItem>
+  );
+}
 
 @observer
 class EditUaListCard extends React.Component<{}, EditUaListCardState> {
@@ -59,37 +170,12 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
         <CardTitle text="User agents" />
         <List>
           {stateManager.uaSpecList.map((uaSpec) => (
-            <ListItem button={true} onClick={() => this.onEdit(uaSpec.id)}>
-              <ListItemIcon>
-                <DeviceTypeIcon deviceType={uaSpec.deviceType} />
-              </ListItemIcon>
-              <ListItemText
-                primary={uaSpec.name}
-                secondary={uaSpec.value}
-                style={{width: 'max-content', maxWidth: 400}}
-                secondaryTypographyProps={{
-                  style: {
-                    wordBreak: 'break-all',
-                  },
-                }}
-              />
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  this.onMoveUp(uaSpec.id);
-                }}
-              >
-                <ArrowUpward />
-              </IconButton>
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  this.onMoveDown(uaSpec.id);
-                }}
-              >
-                <ArrowDownward />
-              </IconButton>
-            </ListItem>
+            <EditUaListItem
+              uaSpec={uaSpec}
+              onClick={() => this.onEdit(uaSpec.id)}
+              onMoveUpClick={() => stateManager.moveUaSpecUp(uaSpec.id)}
+              onMoveDownClick={() => stateManager.moveUaSpecDown(uaSpec.id)}
+            />
           ))}
         </List>
         <CardActions>
@@ -98,7 +184,11 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
           </Button>
           <Button
             color="primary"
-            onClick={() => this.onReset()}
+            onClick={() => {
+              this.setState({
+                isResetConfirmationDialogOpen: true,
+              });
+            }}
             disabled={stateManager.isUaSpecListSameAsDefault()}
             style={{marginLeft: 'auto'}}
           >
@@ -154,7 +244,11 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
           <DialogActions>
             <Button
               color="secondary"
-              onClick={() => this.onDelete()}
+              onClick={() => {
+                this.setState({
+                  isDeleteConfirmationDialogOpen: true,
+                });
+              }}
               style={{
                 marginLeft: 8,
                 marginRight: 'auto',
@@ -184,51 +278,41 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={this.state.isDeleteConfirmationDialogOpen}>
-          <DialogContent>
-            <DialogContentText>
-              {activeUaSpec === null
-                ? ''
-                : `Delete user agent "${activeUaSpec.name}"?`}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button color="primary" onClick={() => this.onCancelDelete()}>
-              Cancel
-            </Button>
-            <Button color="primary" onClick={() => this.onConfirmDelete()}>
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <DeleteConfirmationDialog
+          isOpen={this.state.isDeleteConfirmationDialogOpen}
+          uaSpec={activeUaSpec}
+          onCancel={() => {
+            this.setState({
+              isDeleteConfirmationDialogOpen: false,
+            });
+          }}
+          onConfirm={() => {
+            if (this.hasActiveUaSpec()) {
+              stateManager.deleteUaSpec(this.state.activeUaSpecId!);
+            }
+            this.setState({
+              isDeleteConfirmationDialogOpen: false,
+            });
+            this.onCancelEdit();
+          }}
+        />
 
-        <Dialog open={this.state.isResetConfirmationDialogOpen}>
-          <DialogTitle>Reset to default?</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This will undo any changes you have made to this list, and will
-              remove any custom user agent configurations you have added.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button color="primary" onClick={() => this.onCancelReset()}>
-              Cancel
-            </Button>
-            <Button color="primary" onClick={() => this.onConfirmReset()}>
-              Reset
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <ResetConfirmationDialog
+          isOpen={this.state.isResetConfirmationDialogOpen}
+          onCancel={() => {
+            this.setState({
+              isResetConfirmationDialogOpen: false,
+            });
+          }}
+          onConfirm={() => {
+            stateManager.resetUaSpecListToDefault();
+            this.setState({
+              isResetConfirmationDialogOpen: false,
+            });
+          }}
+        />
       </Paper>
     );
-  }
-
-  onMoveUp(id: string) {
-    stateManager.moveUaSpecUp(id);
-  }
-
-  onMoveDown(id: string) {
-    stateManager.moveUaSpecDown(id);
   }
 
   onEdit(id: string) {
@@ -288,52 +372,11 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
     });
   }
 
-  onDelete() {
-    this.setState({
-      isDeleteConfirmationDialogOpen: true,
-    });
-  }
-
-  onCancelDelete() {
-    this.setState({
-      isDeleteConfirmationDialogOpen: false,
-    });
-  }
-
-  onConfirmDelete() {
-    if (this.hasActiveUaSpec()) {
-      stateManager.deleteUaSpec(this.state.activeUaSpecId!);
-    }
-    this.setState({
-      isDeleteConfirmationDialogOpen: false,
-    });
-    this.onCancelEdit();
-  }
-
   onAdd() {
     this.setState({
       activeUaSpecId: null,
       isEditDialogOpen: true,
       editedUaSpec: {...NEW_UA_SPEC, id: uuidv4()},
-    });
-  }
-
-  onReset() {
-    this.setState({
-      isResetConfirmationDialogOpen: true,
-    });
-  }
-
-  onCancelReset() {
-    this.setState({
-      isResetConfirmationDialogOpen: false,
-    });
-  }
-
-  onConfirmReset() {
-    stateManager.resetUaSpecListToDefault();
-    this.setState({
-      isResetConfirmationDialogOpen: false,
     });
   }
 
