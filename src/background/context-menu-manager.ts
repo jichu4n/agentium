@@ -1,6 +1,6 @@
 import {reaction, toJS} from 'mobx';
 import openOptionsPage from 'src/lib/open-options-page';
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 import {browser, Menus} from 'webextension-polyfill-ts';
 
 const TOGGLE_ENABLED = 'toggle-enabled';
@@ -12,7 +12,11 @@ class ContextMenuManager {
   public start() {
     browser.contextMenus.onClicked.addListener(this.onMenuClick.bind(this));
     reaction(
-      () => [State.isEnabled, State.selectedUaSpec, toJS(State.uaSpecList)],
+      () => [
+        stateManager.isEnabled,
+        stateManager.selectedUaSpec,
+        toJS(stateManager.uaSpecList),
+      ],
       this.onStateChange.bind(this)
     );
   }
@@ -35,22 +39,25 @@ class ContextMenuManager {
   }
 
   onToggleEnabled() {
-    State.toggleEnabled();
+    stateManager.toggleEnabled();
   }
 
   onSelectUaSpec(id: string) {
-    State.setSelectedUaSpecId(id);
+    stateManager.setSelectedUaSpecId(id);
   }
 
   onStateChange() {
     browser.contextMenus.removeAll();
-    if (State.selectedUaSpec !== null && State.uaSpecList.length > 0) {
+    if (
+      stateManager.selectedUaSpec !== null &&
+      stateManager.uaSpecList.length > 0
+    ) {
       browser.contextMenus.create({
         contexts: ['browser_action'],
         id: TOGGLE_ENABLED,
-        title: State.isEnabled
+        title: stateManager.isEnabled
           ? 'Turn OFF - Use default user agent'
-          : `Turn ON - ${State.selectedUaSpec.name}`,
+          : `Turn ON - ${stateManager.selectedUaSpec.name}`,
       });
     }
     browser.contextMenus.create({
@@ -58,11 +65,11 @@ class ContextMenuManager {
       id: UA_SPEC_LIST,
       title: 'Choose user agent',
     });
-    State.uaSpecList.forEach((uaSpec) => {
+    stateManager.uaSpecList.forEach((uaSpec) => {
       browser.contextMenus.create({
         contexts: ['browser_action'],
         type: 'radio',
-        checked: uaSpec.id === State.selectedUaSpecId,
+        checked: uaSpec.id === stateManager.selectedUaSpecId,
         id: `${UA_SPEC_PREFIX}${uaSpec.id}`,
         title: uaSpec.name,
         parentId: UA_SPEC_LIST,

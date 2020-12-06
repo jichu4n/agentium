@@ -35,7 +35,7 @@ const STORAGE_KEYS = {
 };
 const DEFAULT_UA_SPEC_LIST_STRING = JSON.stringify(DEFAULT_UA_SPEC_LIST);
 
-class State {
+class StateManager {
   @observable
   public uaSpecList: IObservableArray<UaSpec> = observable([]);
   @observable
@@ -311,4 +311,5 @@ class State {
   }
 }
 
-export default new State();
+const stateManager = new StateManager();
+export default stateManager;

@@ -21,7 +21,7 @@ import * as React from 'react';
 import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import UaSpec from 'src/lib/ua-spec';
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 import {v4 as uuidv4} from 'uuid';
 import './edit-ua-list-card.css';
 
@@ -58,7 +58,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
       <Paper>
         <CardTitle text="User agents" />
         <List>
-          {State.uaSpecList.map((uaSpec) => (
+          {stateManager.uaSpecList.map((uaSpec) => (
             <ListItem button={true} onClick={() => this.onEdit(uaSpec.id)}>
               <ListItemIcon>
                 <DeviceTypeIcon deviceType={uaSpec.deviceType} />
@@ -99,7 +99,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
           <Button
             color="primary"
             onClick={() => this.onReset()}
-            disabled={State.isUaSpecListSameAsDefault()}
+            disabled={stateManager.isUaSpecListSameAsDefault()}
             style={{marginLeft: 'auto'}}
           >
             Reset to default
@@ -175,7 +175,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
                 (this.hasActiveUaSpec() &&
                   _.isEqual(
                     this.state.editedUaSpec,
-                    State.getUaSpec(this.state.activeUaSpecId!)
+                    stateManager.getUaSpec(this.state.activeUaSpecId!)
                   ))
               }
             >
@@ -224,15 +224,15 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   onMoveUp(id: string) {
-    State.moveUaSpecUp(id);
+    stateManager.moveUaSpecUp(id);
   }
 
   onMoveDown(id: string) {
-    State.moveUaSpecDown(id);
+    stateManager.moveUaSpecDown(id);
   }
 
   onEdit(id: string) {
-    const uaSpec = State.getUaSpec(id);
+    const uaSpec = stateManager.getUaSpec(id);
     if (!uaSpec) {
       return;
     }
@@ -266,9 +266,12 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   onConfirmEdit() {
     if (this.state.editedUaSpec != null) {
       if (this.hasActiveUaSpec()) {
-        State.updateUaSpec(this.state.activeUaSpecId!, this.state.editedUaSpec);
+        stateManager.updateUaSpec(
+          this.state.activeUaSpecId!,
+          this.state.editedUaSpec
+        );
       } else {
-        State.addUaSpec(this.state.editedUaSpec);
+        stateManager.addUaSpec(this.state.editedUaSpec);
       }
     }
     this.onCancelEdit();
@@ -299,7 +302,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
 
   onConfirmDelete() {
     if (this.hasActiveUaSpec()) {
-      State.deleteUaSpec(this.state.activeUaSpecId!);
+      stateManager.deleteUaSpec(this.state.activeUaSpecId!);
     }
     this.setState({
       isDeleteConfirmationDialogOpen: false,
@@ -328,7 +331,7 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   }
 
   onConfirmReset() {
-    State.resetUaSpecListToDefault();
+    stateManager.resetUaSpecListToDefault();
     this.setState({
       isResetConfirmationDialogOpen: false,
     });
@@ -337,13 +340,13 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   hasActiveUaSpec() {
     return (
       !!this.state.activeUaSpecId &&
-      !!State.getUaSpec(this.state.activeUaSpecId)
+      !!stateManager.getUaSpec(this.state.activeUaSpecId)
     );
   }
 
   getActiveUaSpec() {
     return this.state.activeUaSpecId
-      ? State.getUaSpec(this.state.activeUaSpecId)
+      ? stateManager.getUaSpec(this.state.activeUaSpecId)
       : null;
   }
 }

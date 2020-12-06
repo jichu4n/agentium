@@ -1,4 +1,4 @@
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 import {browser, WebRequest} from 'webextension-polyfill-ts';
 
 class UaHeaderManager {
@@ -11,15 +11,17 @@ class UaHeaderManager {
   }
 
   onBeforeSendHeaders(details: WebRequest.OnBeforeSendHeadersDetailsType) {
-    if (!State.isEnabledAndHasValidUaSpec() || details.requestHeaders == null) {
+    if (
+      !stateManager.isEnabledAndHasValidUaSpec() ||
+      details.requestHeaders == null
+    ) {
       return {};
     }
     return {
-      requestHeaders: details.requestHeaders.map(
-        (header) =>
-          header.name.toLowerCase() == 'user-agent'
-            ? {name: 'User-Agent', value: State.selectedUaSpec!.value}
-            : header
+      requestHeaders: details.requestHeaders.map((header) =>
+        header.name.toLowerCase() === 'user-agent'
+          ? {name: header.name, value: stateManager.selectedUaSpec!.value}
+          : header
       ),
     };
   }

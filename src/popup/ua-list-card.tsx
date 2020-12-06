@@ -13,7 +13,7 @@ import * as React from 'react';
 import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import openOptionsPage from 'src/lib/open-options-page';
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 
 @observer
 class UaListCard extends React.Component<{}, {}> {
@@ -22,20 +22,20 @@ class UaListCard extends React.Component<{}, {}> {
       <Card>
         <CardTitle text="User agents" />
         <List>
-          {State.uaSpecList.map((uaSpec) => (
+          {stateManager.uaSpecList.map((uaSpec) => (
             <ListItem
               key={uaSpec.id}
               button={true}
               dense={true}
-              onClick={() => State.setSelectedUaSpecId(uaSpec.id)}
-              selected={uaSpec.id === State.selectedUaSpecId}
+              onClick={() => stateManager.setSelectedUaSpecId(uaSpec.id)}
+              selected={uaSpec.id === stateManager.selectedUaSpecId}
             >
               <Radio
                 value={uaSpec.id}
                 color="default"
                 icon={<RadioButtonUnchecked />}
                 checkedIcon={<RadioButtonChecked />}
-                checked={uaSpec.id === State.selectedUaSpecId}
+                checked={uaSpec.id === stateManager.selectedUaSpecId}
               />
               <ListItemText primary={uaSpec.name} />
               <ListItemIcon>

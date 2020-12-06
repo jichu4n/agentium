@@ -1,6 +1,6 @@
 import green from '@material-ui/core/colors/green';
 import {autorun} from 'mobx';
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 import {browser} from 'webextension-polyfill-ts';
 
 class BrowserActionManager {
@@ -11,11 +11,11 @@ class BrowserActionManager {
 
   onStateChange() {
     browser.browserAction.setBadgeText({
-      text: State.isEnabledAndHasValidUaSpec() ? 'ON' : '',
+      text: stateManager.isEnabledAndHasValidUaSpec() ? 'ON' : '',
     });
     browser.browserAction.setTitle({
-      title: State.isEnabledAndHasValidUaSpec()
-        ? `Agentium:  ON - ${State.selectedUaSpec!.name}`
+      title: stateManager.isEnabledAndHasValidUaSpec()
+        ? `Agentium:  ON - ${stateManager.selectedUaSpec!.name}`
         : `Agentium:  OFF - Using default user agent`,
     });
   }

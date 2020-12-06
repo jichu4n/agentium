@@ -9,7 +9,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import {observer} from 'mobx-react';
 import * as React from 'react';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
-import State from 'src/state/state';
+import stateManager from 'src/state/state-manager';
 import './toggle-enabled-card.css';
 
 @observer
@@ -17,36 +17,38 @@ class ToggleEnabledCard extends React.Component<{}, {}> {
   render() {
     return (
       <Card>
-        <CardActionArea onClick={() => State.toggleEnabled()}>
+        <CardActionArea onClick={() => stateManager.toggleEnabled()}>
           <CardMedia
             component="img"
             classes={{
               media: 'toggle-enabled-button',
             }}
             image={
-              State.isEnabledAndHasValidUaSpec()
+              stateManager.isEnabledAndHasValidUaSpec()
                 ? '/power-active.png'
                 : '/power-inactive.png'
             }
-            title={State.isEnabledAndHasValidUaSpec() ? 'Turn off' : 'Turn on'}
+            title={
+              stateManager.isEnabledAndHasValidUaSpec() ? 'Turn off' : 'Turn on'
+            }
           />
           <Divider />
           <List>
-            {State.selectedUaSpec != null && (
+            {stateManager.selectedUaSpec != null && (
               <ListItem dense={true}>
                 <ListItemText
-                  primary={State.selectedUaSpec.name}
+                  primary={stateManager.selectedUaSpec.name}
                   primaryTypographyProps={
-                    State.isEnabledAndHasValidUaSpec()
+                    stateManager.isEnabledAndHasValidUaSpec()
                       ? {}
                       : {color: 'textSecondary'}
                   }
                 />
                 <ListItemIcon>
                   <DeviceTypeIcon
-                    deviceType={State.selectedUaSpec.deviceType}
+                    deviceType={stateManager.selectedUaSpec.deviceType}
                     color={
-                      State.isEnabledAndHasValidUaSpec()
+                      stateManager.isEnabledAndHasValidUaSpec()
                         ? undefined
                         : 'disabled'
                     }
