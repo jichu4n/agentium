@@ -14,6 +14,9 @@ import {v4 as uuidv4} from 'uuid';
 import {browser} from 'webextension-polyfill-ts';
 import BrowserStorage from './browser-storage';
 import DEFAULT_UA_SPEC_LIST from './default-ua-spec-list';
+import {UaRule} from 'src/lib/ua-rule';
+
+// Storage keys.
 
 // Deprecated - index-based storage scheme, no IDs.
 const V1_UA_SPEC_LIST = 'v1/uaSpecList';
@@ -24,24 +27,44 @@ const V2_UA_SPEC_LIST = 'v2/uaSpecList';
 const V2_SELECTED_UA_SPEC_ID = 'v2/selectedUaSpecId';
 
 const IS_ENABLED = 'v1/isEnabled';
+
+const UA_RULE_LIST_SYNC = 'v1/uaRuleListSync';
+const UA_RULE_LIST_LOCAL = 'v1/uaRuleListLocal';
+
+/** All storage keys. */
 const STORAGE_KEYS = {
   sync: [
     V1_UA_SPEC_LIST,
     V1_SELECTED_UA_SPEC_IDX,
     V2_UA_SPEC_LIST,
     V2_SELECTED_UA_SPEC_ID,
+    UA_RULE_LIST_SYNC,
   ],
-  local: [IS_ENABLED],
+  local: [IS_ENABLED, UA_RULE_LIST_LOCAL],
 };
+
 const DEFAULT_UA_SPEC_LIST_STRING = JSON.stringify(DEFAULT_UA_SPEC_LIST);
 
 class StateManager {
+  /** The list of configured user agent identities. */
   @observable
   public uaSpecList: IObservableArray<UaSpec> = observable([]);
+  /** ID of the currently selected user agent identity.
+   *
+   * This user agent identity will be applied by default when `isEnabled` is true.
+   */
   @observable
   public selectedUaSpecId: string | null = null;
+  /** Whether to apply the selected user agent identity (unless overridden by rules). */
   @observable
   public isEnabled = false;
+
+  /** List of configured rules synced across devices. */
+  @observable
+  public uaRuleListSync: IObservableArray<UaRule> = observable([]);
+  /** List of configured rules local to this device. */
+  @observable
+  public uaRuleListLocal: IObservableArray<UaRule> = observable([]);
 
   @action
   public toggleEnabled() {
@@ -141,6 +164,29 @@ class StateManager {
     return _.isEqual(toJS(this.uaSpecList), DEFAULT_UA_SPEC_LIST);
   }
 
+  @action
+  public addUaRule(uaRule: UaRule) {
+    this.getUaRuleListForUaRule(uaRule).push(uaRule);
+  }
+
+  @action
+  public deleteUaRule(id: string) {
+    if (!_.has(this.uaRuleListAndIdxById, id)) {
+      return;
+    }
+    const {uaRuleList, idx} = this.uaRuleListAndIdxById[id];
+    uaRuleList.splice(idx, 1);
+  }
+
+  @action
+  public updateUaRule(uaRule: UaRule) {
+    if (!_.has(this.uaRuleListAndIdxById, uaRule.id)) {
+      return;
+    }
+    const {uaRuleList, idx} = this.uaRuleListAndIdxById[uaRule.id];
+    uaRuleList.splice(idx, 1, uaRule);
+  }
+
   isLoading = false;
   isStoring = false;
 
@@ -156,8 +202,12 @@ class StateManager {
     console.info('LOAD START');
     let result = Object.assign(
       {},
-      await BrowserStorage.syncGet([V2_UA_SPEC_LIST, V2_SELECTED_UA_SPEC_ID]),
-      await BrowserStorage.localGet([IS_ENABLED])
+      await BrowserStorage.syncGet([
+        V2_UA_SPEC_LIST,
+        V2_SELECTED_UA_SPEC_ID,
+        UA_RULE_LIST_SYNC,
+      ]),
+      await BrowserStorage.localGet([IS_ENABLED, UA_RULE_LIST_LOCAL])
     );
     runInAction(() => {
       // Load uaSpecList.
@@ -190,6 +240,19 @@ class StateManager {
       if (_.has(result, IS_ENABLED)) {
         this.isEnabled = result[IS_ENABLED];
       }
+
+      // Load uaRuleListSync and uaRuleListLocal.
+      for (const [storageKey, uaRuleList] of [
+        [UA_RULE_LIST_SYNC, this.uaRuleListSync],
+        [UA_RULE_LIST_LOCAL, this.uaRuleListLocal],
+      ] as const) {
+        if (_.has(result, storageKey)) {
+          console.log(`${storageKey}: ${result[storageKey]}`);
+          try {
+            uaRuleList.replace(JSON.parse(result[storageKey]));
+          } catch (e) {}
+        }
+      }
     });
     console.info('LOAD END');
     this.isLoading = false;
@@ -215,9 +278,11 @@ class StateManager {
           ? '[]'
           : uaSpecListString,
       [V2_SELECTED_UA_SPEC_ID]: this.selectedUaSpecId,
+      [UA_RULE_LIST_SYNC]: JSON.stringify(toJS(this.uaRuleListSync)),
     });
     await BrowserStorage.localSet({
       [IS_ENABLED]: this.isEnabled,
+      [UA_RULE_LIST_LOCAL]: JSON.stringify(toJS(this.uaRuleListLocal)),
     });
     console.info('STORE END');
     this.isStoring = false;
@@ -308,6 +373,31 @@ class StateManager {
 
   getUaSpecListIdx(id: string) {
     return this.uaSpecListIdxById[id] ?? -1;
+  }
+
+  @computed
+  get uaRuleListById() {
+    return _.keyBy([...this.uaRuleListLocal, ...this.uaRuleListSync], 'id');
+  }
+
+  @computed
+  get uaRuleListAndIdxById() {
+    return _([this.uaRuleListLocal, this.uaRuleListSync])
+      .flatMap((uaRuleList) =>
+        uaRuleList.map(
+          (uaRule, idx) =>
+            [uaRule.id, {uaRuleList, idx}] as [
+              string,
+              {uaRuleList: IObservableArray<UaRule>; idx: number}
+            ]
+        )
+      )
+      .fromPairs()
+      .value();
+  }
+
+  getUaRuleListForUaRule(uaRule: UaRule) {
+    return uaRule.shouldSync ? this.uaRuleListSync : this.uaRuleListLocal;
   }
 }
 
