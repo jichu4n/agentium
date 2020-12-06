@@ -242,20 +242,22 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
             </DialogContent>
           )}
           <DialogActions>
-            <Button
-              color="secondary"
-              onClick={() => {
-                this.setState({
-                  isDeleteConfirmationDialogOpen: true,
-                });
-              }}
-              style={{
-                marginLeft: 8,
-                marginRight: 'auto',
-              }}
-            >
-              Delete
-            </Button>
+            {this.hasActiveUaSpec() && (
+              <Button
+                color="secondary"
+                onClick={() => {
+                  this.setState({
+                    isDeleteConfirmationDialogOpen: true,
+                  });
+                }}
+                style={{
+                  marginLeft: 8,
+                  marginRight: 'auto',
+                }}
+              >
+                Delete
+              </Button>
+            )}
             <Button color="primary" onClick={() => this.onCancelEdit()}>
               Cancel
             </Button>
