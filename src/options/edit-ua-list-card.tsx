@@ -15,23 +15,15 @@ import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {observer} from 'mobx-react';
-import * as React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import CardTitle from 'src/lib/card-title';
 import DeviceTypeIcon from 'src/lib/device-type-icon';
 import UaSpec from 'src/lib/ua-spec';
+import usePrevious from 'src/lib/use-previous';
 import stateManager from 'src/state/state-manager';
 import {v4 as uuidv4} from 'uuid';
-import './edit-ua-list-card.css';
-
-interface EditUaListCardState {
-  activeUaSpecId: string | null;
-  isDeleteConfirmationDialogOpen: boolean;
-  isResetConfirmationDialogOpen: boolean;
-  isEditDialogOpen: boolean;
-  editedUaSpec: UaSpec | null;
-}
 
 /** Template for creating a new UaSpec. */
 const NEW_UA_SPEC: Omit<UaSpec, 'id'> = {
@@ -43,13 +35,11 @@ const NEW_UA_SPEC: Omit<UaSpec, 'id'> = {
 function DeleteConfirmationDialog({
   isOpen,
   uaSpec,
-  onCancel,
-  onConfirm,
+  onClose,
 }: {
   isOpen: boolean;
   uaSpec: UaSpec | null;
-  onCancel: () => void;
-  onConfirm: () => void;
+  onClose: () => void;
 }) {
   if (!uaSpec) {
     return null;
@@ -62,10 +52,16 @@ function DeleteConfirmationDialog({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={onCancel}>
+        <Button color="primary" onClick={onClose}>
           Cancel
         </Button>
-        <Button color="primary" onClick={onConfirm}>
+        <Button
+          color="primary"
+          onClick={() => {
+            stateManager.deleteUaSpec(uaSpec.id);
+            onClose();
+          }}
+        >
           Delete
         </Button>
       </DialogActions>
@@ -75,12 +71,10 @@ function DeleteConfirmationDialog({
 
 function ResetConfirmationDialog({
   isOpen,
-  onCancel,
-  onConfirm,
+  onClose,
 }: {
   isOpen: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
+  onClose: () => void;
 }) {
   return (
     <Dialog open={isOpen}>
@@ -92,10 +86,16 @@ function ResetConfirmationDialog({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={onCancel}>
+        <Button color="primary" onClick={onClose}>
           Cancel
         </Button>
-        <Button color="primary" onClick={onConfirm}>
+        <Button
+          color="primary"
+          onClick={() => {
+            stateManager.resetUaSpecListToDefault();
+            onClose();
+          }}
+        >
           Reset
         </Button>
       </DialogActions>
@@ -103,92 +103,250 @@ function ResetConfirmationDialog({
   );
 }
 
-/** An item in the list of UAs. */
-function EditUaListItem({
-  uaSpec,
-  onClick,
-  onMoveUpClick,
-  onMoveDownClick,
+function EditDialog({
+  isOpen,
+  onClose,
+  initialUaSpec,
+  isExistingUaSpec,
 }: {
-  uaSpec: UaSpec;
-  onClick: () => void;
-  onMoveUpClick: () => void;
-  onMoveDownClick: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  initialUaSpec: UaSpec;
+  isExistingUaSpec: boolean;
 }) {
+  const [editedUaSpec, setEditedUaSpec] = useState<UaSpec>({
+    ...initialUaSpec,
+  });
+
+  const editUaSpec = useCallback(
+    (
+      field: keyof UaSpec,
+      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      setEditedUaSpec({
+        ...editedUaSpec,
+        [field]: event.target.value,
+      });
+    },
+    [editedUaSpec]
+  );
+  const editUaSpecName = useCallback((e) => editUaSpec('name', e), [
+    editUaSpec,
+  ]);
+  const editUaSpecValue = useCallback((e) => editUaSpec('value', e), [
+    editUaSpec,
+  ]);
+  const editUaSpecDeviceType = useCallback((e) => editUaSpec('deviceType', e), [
+    editUaSpec,
+  ]);
+
+  const prevIsOpen = usePrevious(isOpen);
+  const [isInstantiated, setIsInstantiated] = useState(false);
+  useEffect(() => {
+    if (!prevIsOpen && isOpen) {
+      // Each time the dialog is opened, we reset editedUaSpec to the value of initialUaSpec.
+      setEditedUaSpec({...initialUaSpec});
+      setIsInstantiated(true);
+    } else if (prevIsOpen && !isOpen) {
+      // When isOpen transitions to false, we wait for the closing animation to finish before
+      // destroying the <Dialog> component.
+      setTimeout(() => setIsInstantiated(false), 100);
+    }
+  }, [isOpen, prevIsOpen, initialUaSpec]);
+
+  const [
+    isDeleteConfirmationDialogOpen,
+    setIsDeleteConfirmationDialogOpen,
+  ] = useState(false);
+
+  if (!isInstantiated) {
+    return null;
+  }
   return (
-    <ListItem button={true} onClick={onClick}>
-      <ListItemIcon>
-        <DeviceTypeIcon deviceType={uaSpec.deviceType} />
-      </ListItemIcon>
-      <ListItemText
-        primary={uaSpec.name}
-        secondary={uaSpec.value}
-        style={{width: 'max-content', maxWidth: 400}}
-        secondaryTypographyProps={{
-          style: {
-            wordBreak: 'break-all',
-          },
-        }}
-      />
-      <IconButton
-        onClick={(e) => {
-          e.stopPropagation();
-          onMoveUpClick();
-        }}
-      >
-        <ArrowUpward />
-      </IconButton>
-      <IconButton
-        onClick={(e) => {
-          e.stopPropagation();
-          onMoveDownClick();
-        }}
-      >
-        <ArrowDownward />
-      </IconButton>
-    </ListItem>
+    <>
+      <Dialog open={isOpen}>
+        <DialogTitle>
+          {isExistingUaSpec ? 'Edit user agent' : 'Add user agent'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth={true}
+            autoFocus={true}
+            margin="normal"
+            label="Name"
+            placeholder="e.g. Google Chrome (Android)"
+            value={editedUaSpec.name}
+            onChange={editUaSpecName}
+          />
+          <TextField
+            fullWidth={true}
+            margin="normal"
+            multiline={true}
+            rows={5}
+            label="User agent string"
+            placeholder="e.g. Mozilla/5.0 (Linux; Android 8.0.0; SM-G9600) ..."
+            value={editedUaSpec.value}
+            onChange={editUaSpecValue}
+          />
+          <TextField
+            select={true}
+            margin="normal"
+            label="Form factor"
+            value={editedUaSpec.deviceType}
+            onChange={editUaSpecDeviceType}
+            style={{minWidth: 150}}
+          >
+            <MenuItem key="desktop" value="desktop">
+              Desktop
+            </MenuItem>
+            <MenuItem key="mobile" value="mobile">
+              Phone
+            </MenuItem>
+            <MenuItem key="tablet" value="tablet">
+              Tablet
+            </MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          {isExistingUaSpec && (
+            <Button
+              color="secondary"
+              onClick={() => setIsDeleteConfirmationDialogOpen(true)}
+              style={{
+                marginLeft: 8,
+                marginRight: 'auto',
+              }}
+            >
+              Delete
+            </Button>
+          )}
+          <Button color="primary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            color="primary"
+            onClick={() => {
+              if (isExistingUaSpec) {
+                stateManager.updateUaSpec(editedUaSpec);
+              } else {
+                stateManager.addUaSpec(editedUaSpec);
+              }
+              onClose();
+            }}
+            disabled={
+              editedUaSpec.name.trim().length === 0 ||
+              editedUaSpec.value.trim().length === 0 ||
+              _.isEqual(editedUaSpec, initialUaSpec)
+            }
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {isExistingUaSpec && (
+        <DeleteConfirmationDialog
+          isOpen={isDeleteConfirmationDialogOpen}
+          uaSpec={initialUaSpec}
+          onClose={() => setIsDeleteConfirmationDialogOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
+/** An item in the list of UAs. */
+const EditUaListItem = observer(({uaSpec}: {uaSpec: UaSpec}) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  return (
+    <>
+      <ListItem button={true} onClick={() => setIsEditDialogOpen(true)}>
+        <ListItemIcon>
+          <DeviceTypeIcon deviceType={uaSpec.deviceType} />
+        </ListItemIcon>
+        <ListItemText
+          primary={uaSpec.name}
+          secondary={uaSpec.value}
+          style={{width: 'max-content', maxWidth: 400}}
+          secondaryTypographyProps={{
+            style: {
+              wordBreak: 'break-all',
+            },
+          }}
+        />
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            stateManager.moveUaSpecUp(uaSpec.id);
+          }}
+        >
+          <ArrowUpward />
+        </IconButton>
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            stateManager.moveUaSpecDown(uaSpec.id);
+          }}
+        >
+          <ArrowDownward />
+        </IconButton>
+      </ListItem>
+
+      <EditDialog
+        isOpen={isEditDialogOpen}
+        initialUaSpec={uaSpec}
+        isExistingUaSpec={true}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
+    </>
+  );
+});
+
+interface EditUaListCardState {
+  isResetConfirmationDialogOpen: boolean;
+  isEditDialogOpen: boolean;
+  newUaSpecId: string;
+}
 @observer
 class EditUaListCard extends React.Component<{}, EditUaListCardState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      activeUaSpecId: null,
-      isDeleteConfirmationDialogOpen: false,
       isResetConfirmationDialogOpen: false,
       isEditDialogOpen: false,
-      editedUaSpec: null,
+      newUaSpecId: '',
     };
   }
 
   render() {
-    const activeUaSpec = this.getActiveUaSpec();
     return (
       <Paper>
         <CardTitle text="User agents" />
         <List>
           {stateManager.uaSpecList.map((uaSpec) => (
-            <EditUaListItem
-              uaSpec={uaSpec}
-              onClick={() => this.onEdit(uaSpec.id)}
-              onMoveUpClick={() => stateManager.moveUaSpecUp(uaSpec.id)}
-              onMoveDownClick={() => stateManager.moveUaSpecDown(uaSpec.id)}
-            />
+            <EditUaListItem key={uaSpec.id} uaSpec={uaSpec} />
           ))}
         </List>
         <CardActions>
-          <Button color="primary" onClick={() => this.onAdd()}>
+          <Button
+            color="primary"
+            onClick={() =>
+              this.setState({
+                newUaSpecId: uuidv4(),
+                isEditDialogOpen: true,
+              })
+            }
+          >
             Add user agent
           </Button>
           <Button
             color="primary"
-            onClick={() => {
+            onClick={() =>
               this.setState({
                 isResetConfirmationDialogOpen: true,
-              });
-            }}
+              })
+            }
             disabled={stateManager.isUaSpecListSameAsDefault()}
             style={{marginLeft: 'auto'}}
           >
@@ -196,203 +354,23 @@ class EditUaListCard extends React.Component<{}, EditUaListCardState> {
           </Button>
         </CardActions>
 
-        <Dialog open={this.state.isEditDialogOpen}>
-          <DialogTitle>
-            {this.hasActiveUaSpec() ? 'Edit user agent' : 'Add user agent'}
-          </DialogTitle>
-          {this.state.editedUaSpec && (
-            <DialogContent>
-              <TextField
-                fullWidth={true}
-                autoFocus={true}
-                margin="normal"
-                label="Name"
-                placeholder="e.g. Google Chrome (Android)"
-                value={this.state.editedUaSpec.name}
-                onChange={this.onEditFieldChange.bind(this, 'name')}
-              />
-              <TextField
-                fullWidth={true}
-                margin="normal"
-                multiline={true}
-                rows={5}
-                label="User agent string"
-                placeholder="e.g. Mozilla/5.0 (Linux; Android 8.0.0; SM-G9600) ..."
-                value={this.state.editedUaSpec.value}
-                onChange={this.onEditFieldChange.bind(this, 'value')}
-              />
-              <TextField
-                select={true}
-                margin="normal"
-                label="Form factor"
-                value={this.state.editedUaSpec.deviceType}
-                onChange={this.onEditFieldChange.bind(this, 'deviceType')}
-                classes={{root: 'select-field'}}
-              >
-                <MenuItem key="desktop" value="desktop">
-                  Desktop
-                </MenuItem>
-                <MenuItem key="mobile" value="mobile">
-                  Phone
-                </MenuItem>
-                <MenuItem key="tablet" value="tablet">
-                  Tablet
-                </MenuItem>
-              </TextField>
-            </DialogContent>
-          )}
-          <DialogActions>
-            {this.hasActiveUaSpec() && (
-              <Button
-                color="secondary"
-                onClick={() => {
-                  this.setState({
-                    isDeleteConfirmationDialogOpen: true,
-                  });
-                }}
-                style={{
-                  marginLeft: 8,
-                  marginRight: 'auto',
-                }}
-              >
-                Delete
-              </Button>
-            )}
-            <Button color="primary" onClick={() => this.onCancelEdit()}>
-              Cancel
-            </Button>
-            <Button
-              color="primary"
-              onClick={() => this.onConfirmEdit()}
-              disabled={
-                this.state.editedUaSpec == null ||
-                this.state.editedUaSpec.name.trim().length === 0 ||
-                this.state.editedUaSpec.value.trim().length === 0 ||
-                (this.hasActiveUaSpec() &&
-                  _.isEqual(
-                    this.state.editedUaSpec,
-                    stateManager.getUaSpec(this.state.activeUaSpecId!)
-                  ))
-              }
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        <DeleteConfirmationDialog
-          isOpen={this.state.isDeleteConfirmationDialogOpen}
-          uaSpec={activeUaSpec}
-          onCancel={() => {
-            this.setState({
-              isDeleteConfirmationDialogOpen: false,
-            });
-          }}
-          onConfirm={() => {
-            if (this.hasActiveUaSpec()) {
-              stateManager.deleteUaSpec(this.state.activeUaSpecId!);
-            }
-            this.setState({
-              isDeleteConfirmationDialogOpen: false,
-            });
-            this.onCancelEdit();
-          }}
+        <EditDialog
+          isOpen={this.state.isEditDialogOpen}
+          initialUaSpec={{...NEW_UA_SPEC, id: this.state.newUaSpecId}}
+          isExistingUaSpec={false}
+          onClose={() => this.setState({isEditDialogOpen: false})}
         />
 
         <ResetConfirmationDialog
           isOpen={this.state.isResetConfirmationDialogOpen}
-          onCancel={() => {
+          onClose={() =>
             this.setState({
               isResetConfirmationDialogOpen: false,
-            });
-          }}
-          onConfirm={() => {
-            stateManager.resetUaSpecListToDefault();
-            this.setState({
-              isResetConfirmationDialogOpen: false,
-            });
-          }}
+            })
+          }
         />
       </Paper>
     );
-  }
-
-  onEdit(id: string) {
-    const uaSpec = stateManager.getUaSpec(id);
-    if (!uaSpec) {
-      return;
-    }
-    this.setState({
-      activeUaSpecId: id,
-      isEditDialogOpen: true,
-      editedUaSpec: {...uaSpec},
-    });
-  }
-
-  onCancelEdit() {
-    this.setState(
-      {
-        isEditDialogOpen: false,
-      },
-      () =>
-        // The edit dialog's dismissal will be animated, so immediately resetting editedUaSpec will
-        // result in a "flash" of the edit dialog in an invalid state. To address this, we use a
-        // setTimeout to reset editedUaSpec only after the edit dialog is fully hidden.
-        setTimeout(
-          () =>
-            this.setState({
-              activeUaSpecId: null,
-              editedUaSpec: null,
-            }),
-          100
-        )
-    );
-  }
-
-  onConfirmEdit() {
-    if (this.state.editedUaSpec != null) {
-      if (this.hasActiveUaSpec()) {
-        stateManager.updateUaSpec(
-          this.state.activeUaSpecId!,
-          this.state.editedUaSpec
-        );
-      } else {
-        stateManager.addUaSpec(this.state.editedUaSpec);
-      }
-    }
-    this.onCancelEdit();
-  }
-
-  onEditFieldChange(
-    field: string,
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    this.setState({
-      editedUaSpec: Object.assign({}, this.state.editedUaSpec, {
-        [field]: event.target.value,
-      }),
-    });
-  }
-
-  onAdd() {
-    this.setState({
-      activeUaSpecId: null,
-      isEditDialogOpen: true,
-      editedUaSpec: {...NEW_UA_SPEC, id: uuidv4()},
-    });
-  }
-
-  hasActiveUaSpec() {
-    return (
-      !!this.state.activeUaSpecId &&
-      !!stateManager.getUaSpec(this.state.activeUaSpecId)
-    );
-  }
-
-  getActiveUaSpec() {
-    return this.state.activeUaSpecId
-      ? stateManager.getUaSpec(this.state.activeUaSpecId)
-      : null;
   }
 }
 
