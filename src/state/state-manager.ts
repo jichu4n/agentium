@@ -122,8 +122,8 @@ class StateManager {
   }
 
   @action
-  public updateUaSpec(id: string, uaSpec: UaSpec) {
-    const idx = this.getUaSpecListIdx(id);
+  public updateUaSpec(uaSpec: UaSpec) {
+    const idx = this.getUaSpecListIdx(uaSpec.id);
     if (idx < 0 || idx >= this.uaSpecList.length) {
       return;
     }
