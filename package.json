@@ -7,7 +7,7 @@
     "@material-ui/icons": "^4.11.2",
     "detect-browser": "^5.2.0",
     "fontsource-roboto": "^3.0.3",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "mobx": "^6.0.4",
     "mobx-react": "^7.0.5",
     "react": "^17.0.1",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@types/detect-browser": "^4.0.0",
-    "@types/lodash": "^4.14.165",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^14.14.10",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
